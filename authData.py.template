@@ -1,2 +1,2 @@
-TOKEN = "SomeTokenHere"
-OTHERTOKEN = "SomeOtherToken"
+APP_TOKEN = "Some long number"
+BOT_TOKEN = "A long, weird sequence of characters"
