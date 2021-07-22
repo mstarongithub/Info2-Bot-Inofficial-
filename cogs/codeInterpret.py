@@ -10,7 +10,7 @@ from pistonapi import PistonAPI
 
 class ExecCode(commands.Cog):
     """
-    Execute code and display it´s output
+    Execute codeblocks and respond with their output
     """
 
     def __init__(self, bot, piston_api):
@@ -24,6 +24,7 @@ class ExecCode(commands.Cog):
         self.api = piston_api
         self.bot = bot
 
+    # Error indicating keywords (must be lowercase)
     errors = [
         'error',
         'exception',
@@ -31,14 +32,25 @@ class ExecCode(commands.Cog):
         'invalid'
     ]
 
-    def contains_error(self, string):
+    def __contains_error(self, string):
+        "Check if `string` contains any keyword within `self.errors`"
+
         for e in self.errors:
-            if e in string.lower(): 
+            if e in string.lower():
                 return True
         return False
 
-    def make_embed(self, body, lang, version):
-        err = self.contains_error(body)
+    def __make_embed(self, body, lang, version):
+        """
+        Create an embed containing the response `body` as well as the used
+        interpreter `lang` and it´s `version`.
+        
+        Embed color: 
+        - `0xff2300` (Red) if an error occured during execution.
+        - `0x6fbbd3` (Blue) otherwise
+        """
+
+        err = self.__contains_error(body)
         col = 0xff2300 if err else 0x6fbbd3
         embed = discord.Embed(
             title=f'Result using `{lang} ({version})`', 
@@ -47,22 +59,32 @@ class ExecCode(commands.Cog):
         embed.add_field(name='Command Line Output', value=body)
         return embed
 
-    @commands.Cog.listener("on_message")
-    async def execute(self, context):
+    @commands.Cog.listener()
+    async def on_message(self, context):
+        """
+        Listener: Responds to any codeblocks with a supported language tag
+        """
+
         message = context.content
-        if context.content[:3] == "```":
+
+        if message[:3] == '```' and message[-3:] == '```':
+            # Message is a codeblock
             lang = message.split('\n')[0][3:]
             code = message.replace(f'```{lang}\n', '')[:-3]
-            if lang in self.langs:
+            if lang in self.langs: 
+                # Language is supported 
+                body = (
+                    '```\n' +
+                    self.api.execute(
+                        language=lang, 
+                        version=self.vers[lang], 
+                        code=code
+                     ) + 
+                    '```'
+                )
                 await context.channel.send(
-                    embed=self.make_embed(
-                        '```\n' +
-                        self.api.execute(
-                            language=lang, 
-                            version=self.vers[lang], 
-                            code=code
-                        ) +
-                        '```',
+                    embed=self.__make_embed(
+                        body,
                         lang,
                         self.vers[lang]
                     )
