@@ -1,8 +1,8 @@
-from discord.ext import commands
-
 """
 Features regarding code interpretation and execution
 """
+
+from discord.ext import commands
 
 class SyntaxCheck(commands.Cog):
     """
