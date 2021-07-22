@@ -1,0 +1,49 @@
+Metadata-Version: 2.1
+Name: pistonapi
+Version: 1.0.1
+Summary: Unofficial Piston API Wrapper for Python
+Home-page: https://github.com/justaprudev/pistonapi
+Author: Priyam Kalra
+Author-email: justaprudev@gmail.com
+License: UNKNOWN
+Platform: UNKNOWN
+Description-Content-Type: text/markdown
+Requires-Dist: requests
+
+# Piston API Wrapper for Python
+
+This is a very simple API Wrapper for the [Piston API](https://github.com/engineer-man/piston).  
+The Piston API documentation can be found [here](https://github.com/engineer-man/piston#Public-API).
+
+
+## Installation
+```sh
+pip install pistonapi
+```
+
+or
+```sh
+python setup.py build
+python setup.py install
+```
+
+
+## Usage Example
+
+```python
+from pistonapi import PistonAPI
+
+# Create a new Piston API instance
+piston = PistonAPI()
+
+# Get all the supported languages
+print(piston.languages)
+# OR
+print(piston.runtimes)
+
+# Execute your own code!
+code = 'print("Hello, World!")'
+print(piston.execute(language="py", version="3.9", code=code))
+```
+
+
