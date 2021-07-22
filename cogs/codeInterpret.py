@@ -33,7 +33,9 @@ class ExecCode(commands.Cog):
     ]
 
     def __contains_error(self, string):
-        "Check if `string` contains any keyword within `self.errors`"
+        """
+        Check if `string` contains any keyword within `self.errors`
+        """
 
         for e in self.errors:
             if e in string.lower():
