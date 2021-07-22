@@ -9,8 +9,8 @@ import os
 
 import authData
 
-__authors__    = "Samuel Becker"
-__credits__    = ["Samuel Becker"]
+__authors__    = "Samuel Becker, Frederik Beimgraben"
+__credits__    = ["Samuel Becker", "Frederik Beimgraben"]
 __maintainer__ = "Samuel Becker"
 __email__      = ""
 __status__     = "WIP"
@@ -21,6 +21,10 @@ bot = commands.Bot(command_prefix="i!")
 async def ping(context):
     await context.send("Pong")
 
+@bot.command()
+@commands.is_owner()
+async def shutdown(context):
+    await context.bot.logout()
 
 if __name__ == '__main__':
     for i in [j[:-3] for j in os.listdir("./cogs") if j[-2:] == "py"]:
