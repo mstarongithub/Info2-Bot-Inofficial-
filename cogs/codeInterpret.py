@@ -58,13 +58,15 @@ class ExecCode(commands.Cog):
                     embed=make_embed(
                         '```\n' +
                         self.api.execute(
-                            language=lang, version=self.vers[lang], code=code) +
+                            language=lang, 
+                            version=self.vers[lang], 
+                            code=code
+                        ) +
                         '```',
                         lang,
                         self.vers[lang]
                     )
                 )
-
 
 
 def setup(bot):
