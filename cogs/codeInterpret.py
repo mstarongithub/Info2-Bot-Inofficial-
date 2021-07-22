@@ -83,12 +83,12 @@ class ExecCode(commands.Cog):
         if context.author.id == self.bot.user.id:
             return # Don't respond to own messages
 
-        message = context.content
+        content = context.content
 
-        if message[:3] == '```' and message[-3:] == '```':
+        if content[:3] == '```' and content[-3:] == '```':
             # Message is a codeblock
-            lang = message.split('\n')[0][3:]
-            code = message.replace(f'```{lang}\n', '')[:-3]
+            lang = content.split('\n')[0][3:]
+            code = content.replace(f'```{lang}\n', '')[:-3]
             if lang in self.langs:
                 # Language is supported
                 body = (
