@@ -4,6 +4,8 @@ Features regarding code interpretation and execution
 
 from discord.ext import commands
 
+from pistonapi import PistonAPI
+
 class SyntaxCheck(commands.Cog):
     """
     Check the syntax of code blocks
@@ -19,3 +21,7 @@ class ExecCode(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+
+def setup(bot):
+    bot.add_cog(SyntaxCheck(bot))
+    bot.add_cog(ExecCode(bot))
