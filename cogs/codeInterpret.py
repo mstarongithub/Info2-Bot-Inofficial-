@@ -8,6 +8,12 @@ from discord.ext.commands.core import command
 
 from pistonapi import PistonAPI
 
+__authors__    = "Frederik Beimgraben"
+__credits__    = ["Frederik Beimgraben"]
+__maintainer__ = "Frederik Beimgraben"
+__email__      = "beimgraben8@gmail.com"
+__status__     = "WIP"
+
 class ExecCode(commands.Cog):
     """
     Execute codeblocks and respond with their output

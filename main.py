@@ -1,13 +1,19 @@
+"""
+This module's function is to start up the barebones bot
+and load in cogs from a subfolder
+"""
+
 import discord
 from discord.ext import commands
 import os
 
 import authData
 
-"""
-This module's function is to start up the barebones bot
-and load in cogs from a subfolder
-"""
+__authors__    = "Samuel Becker"
+__credits__    = ["Samuel Becker"]
+__maintainer__ = "Samuel Becker"
+__email__      = ""
+__status__     = "WIP"
 
 bot = commands.Bot(command_prefix="i!")
 
