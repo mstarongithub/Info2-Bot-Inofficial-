@@ -80,7 +80,7 @@ class ExecCode(commands.Cog):
         Listener: Responds to any codeblocks with a supported language tag
         """
 
-        if message.author.id == self.bot.user.id:
+        if context.author.id == self.bot.user.id:
             return # Don't respond to own messages
 
         message = context.content
