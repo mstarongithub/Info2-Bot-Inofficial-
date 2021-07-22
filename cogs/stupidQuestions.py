@@ -1,11 +1,12 @@
 """
 Automatic reaction to stupid phrases like if-loop
+Those phrases can be created using normal string matching or regular expressions
 """
 
 from discord.ext import commands
 import re
 
-class example(commands.Cog):
+class stupidQuestions(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -15,7 +16,8 @@ class example(commands.Cog):
 
     """
     Format:
-        ("key, be it regex or not", "Answer")
+        "key1, be it regex or not": "Answer",
+        "key2, be it regex or not": "Answer"
     """
     phrases = {
         "if-loop": "While it sometimes may look like it, if constructs are, in fact, not able to construct a loop on their own"
@@ -24,13 +26,15 @@ class example(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.author.id == self.bot.user.id:
-            return
+            return # Don't respond to own messages
         final = ""
         for i in self.phrases:
             if re.search(i, message.content):
+                # Found a match, add answer to response string
+                # Each answer takes it's own line
                 final += f"{self.phrases[i]}\n"
         if len(final) > 0:
-            await message.reply(final[:-1])
+            await message.reply(final[:-1]) # Cut trailing newline and send it
 
 def setup(bot):
-    bot.add_cog(example(bot))
+    bot.add_cog(stupidQuestions(bot))
