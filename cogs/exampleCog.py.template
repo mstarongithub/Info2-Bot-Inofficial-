@@ -4,6 +4,10 @@ class example(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    @commands.Cog.listener()
+    async def on_ready(self):
+        print(f"{__name__} ready")
+
     @commands.command(description="description")
     async def ex(self, context):
         await context.send("Example")
