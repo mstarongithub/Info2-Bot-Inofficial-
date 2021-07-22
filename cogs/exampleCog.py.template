@@ -6,11 +6,16 @@ class example(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        print(f"{__name__} ready")
+        print(f"{self.__class__.__name__} ready")
 
     @commands.command(description="description")
     async def ex(self, context):
         await context.send("Example")
+
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if message.author.id == self.bot.user.id:
+            return # Don't respond to own messages
 
 def setup(bot):
     bot.add_cog(example(bot))

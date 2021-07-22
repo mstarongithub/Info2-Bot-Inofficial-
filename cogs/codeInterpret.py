@@ -52,8 +52,8 @@ class ExecCode(commands.Cog):
         """
         Create an embed containing the response `body` as well as the used
         interpreter `lang` and it´s `version`.
-        
-        Embed color: 
+
+        Embed color:
         - `0xff2300` (Red) if an error occured during execution.
         - `0x6fbbd3` (Blue) otherwise
         """
@@ -61,11 +61,18 @@ class ExecCode(commands.Cog):
         err = self.__contains_error(body)
         col = 0xff2300 if err else 0x6fbbd3
         embed = discord.Embed(
-            title=f'Result using `{lang} ({version})`', 
+            title=f'Result using `{lang} ({version})`',
             color=col
         )
         embed.add_field(name='Command Line Output', value=body)
         return embed
+
+    @commands.Cog.listener()
+    async def on_ready(self):
+        """
+        Listener: Prints class name to stdout once ready
+        """
+        print(f"{self.__class__.__name__} ready")
 
     @commands.Cog.listener()
     async def on_message(self, context):
@@ -73,21 +80,24 @@ class ExecCode(commands.Cog):
         Listener: Responds to any codeblocks with a supported language tag
         """
 
+        if message.author.id == self.bot.user.id:
+            return # Don't respond to own messages
+
         message = context.content
 
         if message[:3] == '```' and message[-3:] == '```':
             # Message is a codeblock
             lang = message.split('\n')[0][3:]
             code = message.replace(f'```{lang}\n', '')[:-3]
-            if lang in self.langs: 
-                # Language is supported 
+            if lang in self.langs:
+                # Language is supported
                 body = (
                     '```\n' +
                     self.api.execute(
-                        language=lang, 
-                        version=self.vers[lang], 
+                        language=lang,
+                        version=self.vers[lang],
                         code=code
-                     ) + 
+                     ) +
                     '```'
                 )
                 await context.channel.send(

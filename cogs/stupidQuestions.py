@@ -12,7 +12,7 @@ class stupidQuestions(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        print(f"{__name__} ready")
+        print(f"{self.__class__.__name__} ready")
 
     """
     Format:
@@ -20,7 +20,9 @@ class stupidQuestions(commands.Cog):
         "key2, be it regex or not": "Answer"
     """
     phrases = {
-        "if-loop": "While it sometimes may look like it, if constructs are, in fact, not able to construct a loop on their own"
+        "if-loop": "While it sometimes may look like it, if constructs are, in fact, not able to construct a loop on their own",
+        "(?<!GNU)[Ll]inux": "It's GNU/Linux, you buffoon!",
+        "(?i)(?:more|not enough) RAM": "Need more ram? Go to https://www.downloadmoreram.com/download.html"
     }
 
     @commands.Cog.listener()
@@ -36,5 +38,23 @@ class stupidQuestions(commands.Cog):
         if len(final) > 0:
             await message.reply(final[:-1]) # Cut trailing newline and send it
 
+class dadMode(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+
+    @commands.Cog.listener()
+    async def on_ready(self):
+        print(f"{self.__class__.__name__} ready")
+
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if message.author.id == self.bot.user.id:
+            return # Don't respond to own messages
+        # Match any string with the syntax of I'm x | I am x
+        match = re.search(r".?(?:I'm|I am) (\b.*\b)", message.content)
+        if match:
+            await message.reply(f"Hi {match.group(1)}, I'm dad!")
+
 def setup(bot):
     bot.add_cog(stupidQuestions(bot))
+    bot.add_cog(dadMode(bot))
