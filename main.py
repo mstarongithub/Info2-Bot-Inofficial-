@@ -5,6 +5,8 @@ and load in cogs from a subfolder
 
 import discord
 from discord.ext import commands
+from discord_slash import SlashCommand, SlashContext
+
 import os
 
 import authData
@@ -15,10 +17,12 @@ __maintainer__ = "Samuel Becker"
 __email__      = ""
 __status__     = "WIP"
 
-bot = commands.Bot(command_prefix="i!")
+bot = commands.Bot(command_prefix="i!", intents=discord.Intents.all())
 
-@bot.command()
-async def ping(context):
+slash = SlashCommand(bot)
+
+@slash.slash(name="ping")
+async def _ping(context: SlashContext):
     await context.send("Pong")
 
 @bot.command()
