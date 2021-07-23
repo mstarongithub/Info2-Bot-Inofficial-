@@ -7,9 +7,21 @@ Including:
     - logging
 """
 
-from discord.ext import commands
+"""
+Notes:
+    Download single folder using git:
+    Setup:
+        - mkdir newFolder
+        - git init
+        - git remote add origin https://github.com/MrEvilOnGitHub/Info2-Bot-Inofficial-.git
+        - git config core.sparseCheckout true
+        - echo "cogs" > .git/info/sparse-checkout
+        - git pull origin branch
+"""
 
-class example(commands.Cog):
+from discord.ext import commands, tasks
+
+class Reloader(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -27,4 +39,4 @@ class example(commands.Cog):
             return # Don't respond to own messages
 
 def setup(bot):
-    bot.add_cog(example(bot))
+    bot.add_cog(Reloader(bot))
