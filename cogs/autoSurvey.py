@@ -30,4 +30,4 @@ class Surveys(commands.Cog):
             return # Don't respond to own messages
 
 def setup(bot):
-    bot.add_cog(example(bot))
+    bot.add_cog(Surveys(bot))
