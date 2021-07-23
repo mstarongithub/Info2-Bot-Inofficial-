@@ -45,11 +45,21 @@ class BotData(object):
     
     def store(self):
         with open(self.path, 'w') as fp:
-            self.data = json.dump(self.data, fp)
+            json.dump(self.data, fp)
 
     def __getitem__(self, path):     
         return self.data[path]
 
+    def __delitem__(self, path):
+        del self.data[path]
+        self.store()
+
+    def __contains__(self, item):
+        return item in self.data
+
     def __setitem__(self, path, value):
         self.data[path] = value
         self.store()
+
+    def __len__(self):
+        return len(self.data)

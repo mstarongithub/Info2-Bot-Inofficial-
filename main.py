@@ -30,9 +30,12 @@ async def shutdown(context):
 
 if __name__ == '__main__':
     data = BotData()
-    data['guilds.01232.surveys1'] = {'name': 'test3'}
-    data['guilds.01235.surveys1'] = {'name': 'test'}
-    data.store()
+
+    bot.bot_data = data
+
+    bot.bot_data["guilds.test"] = 5
+
+    del bot.bot_data["guilds"]
 
     for i in [j[:-3] for j in os.listdir("./cogs") if j[-2:] == "py"]:
         bot.load_extension(f"cogs.{i}")
