@@ -153,6 +153,9 @@ class SurveysReact(commands.Cog):
         Update a survey message
         """
 
+        if self.__get_path(message_id) == None:
+            raise KeyError(f'\"{message_id}\" is not a survey')
+
         if channel_id == None or message_id == None:
             return
 
@@ -166,9 +169,6 @@ class SurveysReact(commands.Cog):
         except discord.errors.NotFound:
             return
 
-        if self.__get_path(message_id) == None:
-            raise KeyError(f'\"{message_id}\" is not a survey')
-
         print(f'Updated Survey: {message_id}')
 
         name = self.__get_attr(message_id, 'name')
@@ -176,8 +176,6 @@ class SurveysReact(commands.Cog):
         untl = self.__get_attr(message_id, 'until')
         opts_raw = self.__get_attr(message_id, 'options')
         opts = [opts_raw[key] for key in opts_raw]
-
-        
 
         await message.edit(
             embed=self.__make_embed(
