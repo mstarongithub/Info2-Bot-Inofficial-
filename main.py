@@ -25,4 +25,5 @@ async def ping(context):
 if __name__ == '__main__':
     for i in [j[:-3] for j in os.listdir("./cogs") if j[-2:] == "py"]:
         bot.load_extension(f"cogs.{i}")
+    bot.load_extension("devTools")
     bot.run(authData.BOT_TOKEN)
