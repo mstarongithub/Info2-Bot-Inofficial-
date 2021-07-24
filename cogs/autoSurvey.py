@@ -30,7 +30,7 @@ class SurveysReact(commands.Cog):
         "{}\N{COMBINING ENCLOSING KEYCAP}".format(num) for num in range(1, 10)
     ]
 
-    def __get_react(self, i=0):
+    def __get_survey_react(self, i=0):
         """
         Return reaction for Index
         """
@@ -50,7 +50,7 @@ class SurveysReact(commands.Cog):
             if done:
                 body += f'\n**{options[o][0]}** got **{options[o][1]} Votes**'
             else:
-                body += f'\n{self.__get_react(o)}:  **{options[o][0]}** *({options[o][1]} Votes)*'
+                body += f'\n{self.__get_survey_react(o)}:  **{options[o][0]}** *({options[o][1]} Votes)*'
 
         body += f'\n\n**Closed at {untl}**' if done else f'\n\n**Vote until {untl}**'
 
@@ -63,7 +63,7 @@ class SurveysReact(commands.Cog):
         return embed
 
     
-    def __get_path(self, survey_id):
+    def __get_survey_path(self, survey_id):
         path = f'surveys.{survey_id}'
 
         if path not in self.bot.bot_data:
@@ -71,20 +71,20 @@ class SurveysReact(commands.Cog):
 
         return path
 
-    def __get_attr(self, survey_id, attr):
-        if self.__get_path(survey_id) == None:
+    def __get_survey_attr(self, survey_id, attr):
+        if self.__get_survey_path(survey_id) == None:
             return None
         
-        return self.bot.bot_data[f'{self.__get_path(survey_id)}.{attr}']
+        return self.bot.bot_data[f'{self.__get_survey_path(survey_id)}.{attr}']
 
-    def __set_attr(self, survey_id, attr, value):        
+    def __set_survey_attr(self, survey_id, attr, value):        
         self.bot.bot_data[f'surveys.{survey_id}.{attr}'] = value
 
     def __is_done(self, survey_id):
-        if self.__get_path(survey_id) == None:
-            return True
+        if self.__get_survey_path(survey_id) == None:
+            return False
 
-        return dateparser.parse(self.__get_attr(survey_id, 'until')) < datetime.now()
+        return dateparser.parse(self.__get_survey_attr(survey_id, 'until')) < datetime.now()
 
     def __parse_reaction_payload(self, payload: discord.RawReactionActionEvent):
         """
@@ -92,18 +92,22 @@ class SurveysReact(commands.Cog):
         """
 
         if payload.guild_id is None:
-            return None, None  # Reaction is on a private message
+            return None, None, None  # Reaction is on a private message
         
         if payload.user_id == self.bot.user.id:
-            return None, None  # Dont count bot reactions
+            return None, None, None  # Dont count bot reactions
         
-        if self.__get_path(payload.message_id) != None:
+        if self.__get_survey_path(payload.message_id) != None:
             if not self.__is_done(payload.message_id):
                 emoji = str(payload.emoji)
-                if emoji in self.__get_attr(payload.message_id, 'options'):
-                    return f'{self.__get_path(payload.message_id)}.options.{emoji}[1]', payload.channel_id
+                if emoji in self.__get_survey_attr(payload.message_id, 'options'):
+                    return (
+                        f'{self.__get_survey_path(payload.message_id)}.options.{emoji}[1]', 
+                        payload.channel_id, 
+                        payload.message_id
+                    )
         
-        return None, payload.channel_id
+        return None, payload.channel_id, payload.message_id
     
     @commands.command(
         description="*survey* \"name\" \"description\" \"until\" \"opt1\" ...")
@@ -117,7 +121,15 @@ class SurveysReact(commands.Cog):
             name = args[0]
             desc = args[1]
             untl = args[2]
-            untl = dateparser.parse(untl).strftime("%m/%d/%Y, %H:%M:%S")
+            time_parsed = dateparser.parse(untl)
+
+            if time_parsed != None:
+                untl = time_parsed.strftime("%m/%d/%Y, %H:%M:%S")
+            else:
+                return await context.send(
+                    'Time format incorrect!'
+                )
+            
             opts = args[3:] if len(args) > 3 else ["Ja", "Nein"]
             opts = [[opts[i], 0] for i in range(len(opts))]
 
@@ -127,26 +139,23 @@ class SurveysReact(commands.Cog):
 
             path = f"surveys.{message.id}"
 
-            self.__set_attr(message.id, 'name', name)
-            self.__set_attr(message.id, 'description', desc)
-            self.__set_attr(message.id, 'until', untl)
-            self.__set_attr(
+            self.__set_survey_attr(message.id, 'name', name)
+            self.__set_survey_attr(message.id, 'description', desc)
+            self.__set_survey_attr(message.id, 'until', untl)
+            self.__set_survey_attr(
                 message.id, 
                 'options', 
-                {self.__get_react(i): opts[i] for i in range(len(opts))}
+                {self.__get_survey_react(i): opts[i] for i in range(len(opts))}
             )
 
             print(f'Survey created: {message.id}')
 
             for o in range(len(opts)):
-                await message.add_reaction(self.__get_react(i=o))
+                await message.add_reaction(self.__get_survey_react(i=o))
     
     async def update_all(self, channel_id):
-        for message_id in self.bot.bot_data['surveys']:
-            await self.update(message_id, channel_id)
         for message_id in list(self.bot.bot_data['surveys']):
-            if self.__is_done(message_id):
-                del self.bot.bot_data[self.__get_path(message_id)]
+            await self.update(message_id, channel_id)
 
     async def update(self, message_id, channel_id):
         """
@@ -156,7 +165,7 @@ class SurveysReact(commands.Cog):
         if channel_id == None or message_id == None:
             return
 
-        if self.__get_path(message_id) == None:
+        if self.__get_survey_path(message_id) == None:
             raise KeyError(f'\"{message_id}\" is not a survey')
 
         try:
@@ -171,10 +180,10 @@ class SurveysReact(commands.Cog):
 
         print(f'Updated Survey: {message_id}')
 
-        name = self.__get_attr(message_id, 'name')
-        desc = self.__get_attr(message_id, 'description')
-        untl = self.__get_attr(message_id, 'until')
-        opts_raw = self.__get_attr(message_id, 'options')
+        name = self.__get_survey_attr(message_id, 'name')
+        desc = self.__get_survey_attr(message_id, 'description')
+        untl = self.__get_survey_attr(message_id, 'until')
+        opts_raw = self.__get_survey_attr(message_id, 'options')
         opts = [opts_raw[key] for key in opts_raw]
 
         await message.edit(
@@ -187,17 +196,22 @@ class SurveysReact(commands.Cog):
             )
         )
 
+        if self.__is_done(message_id):
+            del self.bot.bot_data[self.__get_survey_path(message_id)]
+
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
         """
         Increment when reaction is clicked by user
         """
 
-        counter, channel = self.__parse_reaction_payload(payload)
+        counter, channel, message = self.__parse_reaction_payload(payload)
         if counter != None:
             self.bot.bot_data[counter] += 1
             print(f'Set {counter[:-4]} to {self.bot.bot_data[counter]} (++)')
-        await self.update_all(channel)
+            await self.update(message, channel)
+        if self.__get_survey_path(message) != None:
+            await self.update(message, channel)
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
@@ -205,12 +219,13 @@ class SurveysReact(commands.Cog):
         Decrement when reaction is unclicked by user
         """
 
-        counter, channel = self.__parse_reaction_payload(payload)
+        counter, channel, message = self.__parse_reaction_payload(payload)
         if counter != None:
             self.bot.bot_data[counter] -= 1
             print(f'Set {counter[:-4]} to {self.bot.bot_data[counter]} (--)')
-        if channel != None:
-            await self.update_all(channel)
+            await self.update(message, channel)
+        if self.__get_survey_path(message) != None:
+            await self.update(message, channel)
 
 def setup(bot):
     bot.add_cog(SurveysReact(bot))
