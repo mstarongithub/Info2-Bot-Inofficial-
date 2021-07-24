@@ -1,10 +1,11 @@
+from discord.ext import commands
+import re
+
 """
 Automatic reaction to stupid phrases like if-loop
 Those phrases can be created using normal string matching or regular expressions
 """
 
-from discord.ext import commands
-import re
 
 class stupidQuestions(commands.Cog):
     def __init__(self, bot):
@@ -28,7 +29,7 @@ class stupidQuestions(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.author.id == self.bot.user.id:
-            return # Don't respond to own messages
+            return  # Don't respond to own messages
         final = ""
         for i in self.phrases:
             if re.search(i, message.content):
@@ -36,7 +37,8 @@ class stupidQuestions(commands.Cog):
                 # Each answer takes it's own line
                 final += f"{self.phrases[i]}\n"
         if len(final) > 0:
-            await message.reply(final[:-1]) # Cut trailing newline and send it
+            await message.reply(final[:-1])  # Cut trailing newline and send it
+
 
 class dadMode(commands.Cog):
     def __init__(self, bot):
@@ -49,11 +51,12 @@ class dadMode(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.author.id == self.bot.user.id:
-            return # Don't respond to own messages
+            return  # Don't respond to own messages
         # Match any string with the syntax of I'm x | I am x
         match = re.search(r".?(?:I'm|I am) (\b.*\b)", message.content)
         if match:
             await message.reply(f"Hi {match.group(1)}, I'm dad!")
+
 
 def setup(bot):
     bot.add_cog(stupidQuestions(bot))

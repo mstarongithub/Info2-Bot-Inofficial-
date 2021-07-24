@@ -1,18 +1,20 @@
-"""
-Features regarding code interpretation and execution
-"""
-
 import discord
 from discord.ext import commands
 from discord.ext.commands.core import command
 
 from pistonapi import PistonAPI
 
-__authors__    = "Frederik Beimgraben"
-__credits__    = ["Frederik Beimgraben"]
+"""
+Features regarding code interpretation and execution
+"""
+
+
+__authors__ = "Frederik Beimgraben"
+__credits__ = ["Frederik Beimgraben"]
 __maintainer__ = "Frederik Beimgraben"
-__email__      = "beimgraben8@gmail.com"
-__status__     = "WIP"
+__email__ = "beimgraben8@gmail.com"
+__status__ = "WIP"
+
 
 class ExecCode(commands.Cog):
     """
@@ -21,8 +23,8 @@ class ExecCode(commands.Cog):
 
     def __init__(self, bot, piston_api):
         langs = piston_api.languages
-        self.vers  = {
-                key : langs[key]['version'] for key in langs
+        self.vers = {
+                key: langs[key]['version'] for key in langs
             }
         self.langs = [
                 key for key in langs
@@ -80,8 +82,8 @@ class ExecCode(commands.Cog):
         Listener: Responds to any codeblocks with a supported language tag
         """
 
-        if message.author.id == self.bot.user.id:
-            return # Don't respond to own messages
+        if context.author.id == self.bot.user.id:
+            return   # Don't respond to own messages
 
         message = context.content
 
@@ -92,13 +94,13 @@ class ExecCode(commands.Cog):
             if lang in self.langs:
                 # Language is supported
                 body = (
-                    '```\n' +
-                    self.api.execute(
+                    '```\n'
+                    + self.api.execute(
                         language=lang,
                         version=self.vers[lang],
                         code=code
-                     ) +
-                    '```'
+                     )
+                    + '```'
                 )
                 await context.channel.send(
                     embed=self.__make_embed(

@@ -1,5 +1,11 @@
 from discord.ext import commands
 
+
+"""
+Description
+"""
+
+
 class example(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -15,7 +21,8 @@ class example(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.author.id == self.bot.user.id:
-            return # Don't respond to own messages
+            return  # Don't respond to own messages
+
 
 def setup(bot):
     bot.add_cog(example(bot))

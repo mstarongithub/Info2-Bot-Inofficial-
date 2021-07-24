@@ -1,3 +1,9 @@
+from discord.ext import commands, tasks
+import os
+import shutil
+import asyncpg
+import time
+
 """
 (Automatic) methods to enhance the development flow
 Including:
@@ -7,20 +13,19 @@ Including:
     - logging
 """
 
-__authors__    = "Samuel Becker"
-__credits__    = ["Samuel Becker"]
+__authors__ = "Samuel Becker"
+__credits__ = ["Samuel Becker"]
 __maintainer__ = "Samuel Becker"
-__email__      = "beckersamuel9@gmail.com"
-__status__     = "WIP"
+__email__ = "beckersamuel9@gmail.com"
+__status__ = "WIP"
 
-from discord.ext import commands, tasks
-import os, shutil, asyncpg, time
 
 class Reloader(commands.Cog):
     """
     Provide functionality for reloading cogs in ./cogs and updating them from branch stable
     TODO: Add function to reload specific cog
     """
+
     def __init__(self, bot):
         self.bot = bot
         self.update.add_exception_type(asyncpg.PostgresConnectionError)
@@ -79,13 +84,15 @@ class Reloader(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.author.id == self.bot.user.id:
-            return # Don't respond to own messages
+            return  # Don't respond to own messages
+
 
 class logging:
     """
     Log actions, errors etc from modules
     This requires the module to call logging.log(name, message) to work
     """
+
     def __init__(self, path="./data/logs"):
         self.path = path
         if not os.is_dir(self.path):
@@ -95,7 +102,7 @@ class logging:
     def log(self, module: str, message: str):
         if not os.is_file(f"{self.path}/{module}_log.txt"):
             # Logging file does not exist yet, create it
-            open(f"{self.path}/{module}_log.txt","w").close()
+            open(f"{self.path}/{module}_log.txt", "w").close()
 
         with open(f"{self.path}/{module}_log.txt", "a") as f:
             # Write log message in the following format:
@@ -104,10 +111,12 @@ class logging:
             f.write(f'[{t.tm_year}:{t.tm_month}:{t.tm_day}] \
             [{t.tm_hour}:{t.tm_min}:{t.tm_sec}]: {message}\n')
 
+
 class statistics(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.start = time.time()
+
 
 def setup(bot):
     bot.add_cog(Reloader(bot))
