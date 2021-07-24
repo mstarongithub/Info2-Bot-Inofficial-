@@ -125,8 +125,7 @@ class SurveysReact(commands.Cog):
         
         return None, payload.channel_id, payload.message_id
     
-    @commands.command(
-        description="*survey* \"name\" \"description\" \"until\" \"opt1\" ...")
+    @commands.command(description="Create a new survey")
     async def survey(self, context, *args):
         """
         Create a new survey
@@ -177,7 +176,7 @@ class SurveysReact(commands.Cog):
         """
         Update all surveys in `channel_id`
         """
-        
+
         for message_id in list(self.bot.bot_data['surveys']):
             await self.update(message_id, channel_id)
 
