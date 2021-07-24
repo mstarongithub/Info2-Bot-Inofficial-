@@ -112,7 +112,13 @@ class logging:
             [{t.tm_hour}:{t.tm_min}:{t.tm_sec}]: {message}\n')
 
 
-class statistics(commands.Cog):
+class statistics:
+    def __init__(self):
+        self.startup = time.time()
+        self.executions = {}
+
+
+class statisticsWrapper(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.startup = time.time()
@@ -125,6 +131,14 @@ class statistics(commands.Cog):
         self.bot.logs.log(self.__class__.__name__, "Started")
         print(f"{self.__class__.__name__} ready")
 
+    @commands.command
+    async def uptime(self, context):
+        t = time.gmtime(time.time() - self.bot.startup)
+        await context.reply(f'The bot has been running for \
+        {t.tm_yday+(t.tm_year-1990)*365} days, {t.tm_hour} hours and \
+        {t.tm_min} minutes')
+
 
 def setup(bot):
     bot.add_cog(Reloader(bot))
+    bot.add_cog(statisticsWrapper(bot))
