@@ -15,6 +15,10 @@ __email__      = "beimgraben8@gmail.com"
 __status__     = "WIP"
 
 class SurveysReact(commands.Cog):
+    """
+    Simple reaction surveys with time limit
+    """
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -27,10 +31,15 @@ class SurveysReact(commands.Cog):
     ]
 
     def __get_react(self, i=0):
+        """
+        Return reaction for Index
+        """
+
         assert i < 9
+
         return f'{self.__numbers[i]}'
 
-    def __make_embed(self, name, desc, untl, options):
+    def __make_embed(self, name, desc, untl, options, done=False):
         """
         Create a Survey Embed
         """
@@ -38,9 +47,12 @@ class SurveysReact(commands.Cog):
         body = f"*{desc}*\n"
 
         for o in range(len(options)):
-            body += f'\n{self.__get_react(o)}:  **{options[o][0]}** *({options[o][1]} Votes)*'
+            if done:
+                body += f'\n**{options[o][0]}** got **{options[o][1]} Votes**'
+            else:
+                body += f'\n{self.__get_react(o)}:  **{options[o][0]}** *({options[o][1]} Votes)*'
 
-        body += f'\n\n**Vote until {untl}**'
+        body += f'\n\n**Closed at {untl}**' if done else f'\n\n**Vote until {untl}**'
 
         embed = discord.Embed(
             title=name,
@@ -49,11 +61,58 @@ class SurveysReact(commands.Cog):
 
         embed.add_field(name='Description: ', value=body)
         return embed
+
     
-    @commands.has_permissions(manage_channels=True)
+    def __get_path(self, survey_id):
+        path = f'surveys.{survey_id}'
+
+        if path not in self.bot.bot_data:
+            return None
+
+        return path
+
+    def __get_attr(self, survey_id, attr):
+        if self.__get_path(survey_id) == None:
+            return None
+        
+        return self.bot.bot_data[f'{self.__get_path(survey_id)}.{attr}']
+
+    def __set_attr(self, survey_id, attr, value):        
+        self.bot.bot_data[f'surveys.{survey_id}.{attr}'] = value
+
+    def __is_done(self, survey_id):
+        if self.__get_path(survey_id) == None:
+            return True
+
+        return dateparser.parse(self.__get_attr(survey_id, 'until')) < datetime.now()
+
+    def __parse_reaction_payload(self, payload: discord.RawReactionActionEvent):
+        """
+        Parse user reaction and check if message is a survey
+        """
+
+        if payload.guild_id is None:
+            return None, None  # Reaction is on a private message
+        
+        if payload.user_id == self.bot.user.id:
+            return None, None  # Dont count bot reactions
+        
+        if self.__get_path(payload.message_id) != None:
+            if not self.__is_done(payload.message_id):
+                emoji = str(payload.emoji)
+                if emoji in self.__get_attr(payload.message_id, 'options'):
+                    return f'{self.__get_path(payload.message_id)}.options.{emoji}[1]', payload.channel_id
+        
+        return None, payload.channel_id
+    
     @commands.command(
         description="*survey* \"name\" \"description\" \"until\" \"opt1\" ...")
     async def survey(self, context, *args):
+        """
+        Create a new survey
+        Format: `survey "name" "description" "until" "Option 1" "Option 2" ...`
+        """
+
         if len(args) >= 3:
             name = args[0]
             desc = args[1]
@@ -68,68 +127,77 @@ class SurveysReact(commands.Cog):
 
             path = f"surveys.{message.id}"
 
-            self.bot.bot_data[f'{path}.name']        = name
-            self.bot.bot_data[f'{path}.description'] = desc
-            self.bot.bot_data[f'{path}.until']       = untl
-            self.bot.bot_data[f'{path}.options']     = {
-                self.__get_react(i): opts[i] for i in range(len(opts))
-            }
+            self.__set_attr(message.id, 'name', name)
+            self.__set_attr(message.id, 'description', desc)
+            self.__set_attr(message.id, 'until', untl)
+            self.__set_attr(
+                message.id, 
+                'options', 
+                {self.__get_react(i): opts[i] for i in range(len(opts))}
+            )
 
-            print(f'Survey created: {self.bot.bot_data[path]}')
+            print(f'Survey created: {message.id}')
 
             for o in range(len(opts)):
                 await message.add_reaction(self.__get_react(i=o))
-            
-    async def update(self, ids):
-        path = f"surveys.{ids[2]}"
-        name = self.bot.bot_data[f'{path}.name']
-        desc = self.bot.bot_data[f'{path}.description']
-        untl = self.bot.bot_data[f'{path}.until']
-        opts_raw = self.bot.bot_data[f'{path}.options']
+    
+    async def update_all(self, channel_id):
+        for message_id in self.bot.bot_data['surveys']:
+            await self.update(message_id, channel_id)
+        for message_id in list(self.bot.bot_data['surveys']):
+            if self.__is_done(message_id):
+                del self.bot.bot_data[self.__get_path(message_id)]
+
+    async def update(self, message_id, channel_id):
+        """
+        Update a survey message
+        """
+
+        if self.__get_path(message_id) == None:
+            raise KeyError(f'\"{message_id}\" is not a survey')
+
+        print(f'Updated Survey: {message_id}')
+
+        name = self.__get_attr(message_id, 'name')
+        desc = self.__get_attr(message_id, 'description')
+        untl = self.__get_attr(message_id, 'until')
+        opts_raw = self.__get_attr(message_id, 'options')
         opts = [opts_raw[key] for key in opts_raw]
 
-        assert len(ids) == 3
+        done = self.__is_done(message_id)
 
-        channel = await self.bot.fetch_channel(ids[1])
+        channel = await self.bot.fetch_channel(channel_id)
 
-        message = await channel.fetch_message(ids[2])
+        message = await channel.fetch_message(message_id)
 
         await message.edit(
-            embed=self.__make_embed(name, desc, untl, opts)
+            embed=self.__make_embed(name, desc, untl, opts, done=done)
         )
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
-        counter, ids = self.parse_reaction_payload(payload)
+        """
+        Increment when reaction is clicked by user
+        """
+
+        counter, channel = self.__parse_reaction_payload(payload)
         if counter != None:
             self.bot.bot_data[counter] += 1
-            print(f'Set {counter[:-4]} to {self.bot.bot_data[counter]}')
-            await self.update(ids)
+            print(f'Set {counter[:-4]} to {self.bot.bot_data[counter]} (++)')
+        await self.update_all(channel)
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
-        counter, ids = self.parse_reaction_payload(payload)
+        """
+        Decrement when reaction is unclicked by user
+        """
+
+        counter, channel = self.__parse_reaction_payload(payload)
         if counter != None:
             self.bot.bot_data[counter] -= 1
-            print(f'Set {counter[:-4]} to {self.bot.bot_data[counter]}')
-            await self.update(ids)
-
-    def parse_reaction_payload(self, payload: discord.RawReactionActionEvent):
-        if payload.guild_id is None:
-            return None, (None, None, None)  # Reaction is on a private message
-        if payload.user_id == self.bot.user.id:
-            return None, (None, None, None)  # Reaction is on a private message
-        if f'surveys.{payload.message_id}' in self.bot.bot_data:
-            path  = f"surveys.{payload.message_id}"
-            if dateparser.parse(self.bot.bot_data[f'{path}.until']) > datetime.now():
-                emoji = str(payload.emoji)
-                if emoji in self.bot.bot_data[f'{path}.options']:
-                    return f'{path}.options.{emoji}[1]', (
-                        payload.guild_id,
-                        payload.channel_id,
-                        payload.message_id
-                    )
-        return None, (None, None, None)
+            print(f'Set {counter[:-4]} to {self.bot.bot_data[counter]} (--)')
+        if channel != None:
+            await self.update_all(channel)
 
 def setup(bot):
     bot.add_cog(SurveysReact(bot))
