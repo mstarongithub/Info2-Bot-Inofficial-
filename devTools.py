@@ -7,9 +7,14 @@ Including:
     - logging
 """
 
+__authors__    = "Samuel Becker"
+__credits__    = ["Samuel Becker"]
+__maintainer__ = "Samuel Becker"
+__email__      = "beckersamuel9@gmail.com"
+__status__     = "WIP"
 
 from discord.ext import commands, tasks
-import os, shutil, asyncpg
+import os, shutil, asyncpg, time
 
 class Reloader(commands.Cog):
     """
@@ -31,8 +36,6 @@ class Reloader(commands.Cog):
         'rm -rf .git',
         'rsync -u -r --delete -c -b --backup-dir=./../cogs/backup cogs/ ./../cogs',
         'rsync -u -r --delete -c ./bot-venv/ ./../bot-venv'
-#       'cd ..',
-#    'rm -rf tmp'
     )
 
     def _pullCogs(self):
@@ -77,6 +80,34 @@ class Reloader(commands.Cog):
     async def on_message(self, message):
         if message.author.id == self.bot.user.id:
             return # Don't respond to own messages
+
+class logging:
+    """
+    Log actions, errors etc from modules
+    This requires the module to call logging.log(name, message) to work
+    """
+    def __init__(self, path="./data/logs"):
+        self.path = path
+        if not os.is_dir(self.path):
+            # Log folder does not exist, create it
+            os.mkdir(self.path)
+
+    def log(self, module: str, message: str):
+        if not os.is_file(f"{self.path}/{module}_log.txt"):
+            # Logging file does not exist yet, create it
+            open(f"{self.path}/{module}_log.txt","w").close()
+
+        with open(f"{self.path}/{module}_log.txt", "a") as f:
+            # Write log message in the following format:
+            # [YYYY:MM:DD] [HH:mm:SS]: message
+            t = time.localtime()
+            f.write(f'[{t.tm_year}:{t.tm_month}:{t.tm_day}] \
+            [{t.tm_hour}:{t.tm_min}:{t.tm_sec}]: {message}\n')
+
+class statistics(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+        self.start = time.time()
 
 def setup(bot):
     bot.add_cog(Reloader(bot))

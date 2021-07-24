@@ -8,6 +8,7 @@ from discord.ext import commands
 import os
 
 import authData
+from devTools import logging
 
 __authors__    = "Samuel Becker"
 __credits__    = ["Samuel Becker"]
@@ -16,6 +17,7 @@ __email__      = ""
 __status__     = "WIP"
 
 bot = commands.Bot(command_prefix="i!")
+bot.logs = logging()
 
 @bot.command()
 async def ping(context):
