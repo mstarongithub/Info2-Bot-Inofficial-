@@ -63,14 +63,14 @@ class SurveysReact(commands.Cog):
         return embed
 
     
-    def __get_survey_path(self, survey_id):
+    def __get_survey_path(self, survey_id, must_exist:bool=True):
         """
         Get path to a survey in `bot_data`. `None` if not in `bot_data`
         """
 
         path = f'surveys.{survey_id}'
 
-        if path not in self.bot.bot_data:
+        if path not in self.bot.bot_data and must_exist:
             return None
 
         return path
@@ -83,14 +83,18 @@ class SurveysReact(commands.Cog):
         if self.__get_survey_path(survey_id) == None:
             return None
         
-        return self.bot.bot_data[f'{self.__get_survey_path(survey_id)}.{attr}']
+        attr_path = f'{self.__get_survey_path(survey_id)}.{attr}'
+
+        return self.bot.bot_data[attr_path]
 
     def __set_survey_attr(self, survey_id, attr, value):
         """
         Set a attribute (subpath) for a survey
         """
 
-        self.bot.bot_data[f'surveys.{survey_id}.{attr}'] = value
+        attr_path = f'{self.__get_survey_path(survey_id, False)}.{attr}'
+
+        self.bot.bot_data[attr_path] = value
 
     def __is_done(self, survey_id):
         """
