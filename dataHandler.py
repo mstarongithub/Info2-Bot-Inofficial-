@@ -6,15 +6,16 @@ import json
 from benedict import benedict
 from pathlib import Path
 
-__authors__    = "Frederik Beimgraben"
-__credits__    = ["Frederik Beimgraben"]
+__authors__ = "Frederik Beimgraben"
+__credits__ = ["Frederik Beimgraben"]
 __maintainer__ = "Frederik Beimgraben"
-__email__      = "beimgraben8@gmail.com"
-__status__     = "WIP"
+__email__ = "beimgraben8@gmail.com"
+__status__ = "WIP"
+
 
 class BotData(object):
     def __init__(self, file_name='data.json', folder='db'):
-        
+
         # Check path
         cwd = Path(__file__).parent.absolute()
         data_dir = cwd / 'data'
@@ -29,7 +30,7 @@ class BotData(object):
             'guilds': {},
         })
 
-        self.path = db_dir / file_name # File path
+        self.path = db_dir / file_name  # File path
 
         # Load data
         try:
@@ -38,16 +39,16 @@ class BotData(object):
                     data = benedict(json.load(fp))
                     if data['type'] == 'bot-data':
                         self.data = data
-                    else: 
+                    else:
                         raise ImportError('Data format not supported')
         except ValueError:
             ImportError('Data format not supported')
-    
+
     def store(self):
         with open(self.path, 'w') as fp:
             json.dump(self.data, fp)
 
-    def __getitem__(self, path):     
+    def __getitem__(self, path):
         return self.data[path]
 
     def __delitem__(self, path):
