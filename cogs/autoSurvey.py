@@ -153,7 +153,7 @@ class SurveysReact(commands.Cog):
             else:
                 untl = time_parsed.strftime("%m/%d/%Y, %H:%M:%S")
 
-            opts = args[3:] if len(args) > 3 else ["Ja", "Nein"]
+            opts = args[3:] if len(args) > 3 else ["Yes", "No"]
             opts = [[opts[i], 0] for i in range(len(opts))]
 
             message = await context.send(
