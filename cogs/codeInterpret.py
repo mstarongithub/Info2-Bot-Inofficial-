@@ -74,6 +74,7 @@ class ExecCode(commands.Cog):
         """
         Listener: Prints class name to stdout once ready
         """
+        self.bot.logs.log(self.__class__.__name__, "Started")
         print(f"{self.__class__.__name__} ready")
 
     @commands.Cog.listener()

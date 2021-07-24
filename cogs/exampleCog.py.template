@@ -12,6 +12,10 @@ class example(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
+        """
+        Listener: Logs startup once ready
+        """
+        self.bot.logs.log(self.__class__.__name__, "Started")
         print(f"{self.__class__.__name__} ready")
 
     @commands.command(description="description")

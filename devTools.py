@@ -43,6 +43,10 @@ class Reloader(commands.Cog):
         'rsync -u -r --delete -c ./bot-venv/ ./../bot-venv'
     )
 
+    @commands.Cog.listener()
+    async def on_ready(self):
+        print(f"{self.__class__.__name__} ready")
+
     def _pullCogs(self):
         if "tmp" in os.listdir():
             shutil.rmtree("./tmp")
@@ -78,10 +82,6 @@ class Reloader(commands.Cog):
         await context.send("Finished reloading")
 
     @commands.Cog.listener()
-    async def on_ready(self):
-        print(f"{self.__class__.__name__} ready")
-
-    @commands.Cog.listener()
     async def on_message(self, message):
         if message.author.id == self.bot.user.id:
             return  # Don't respond to own messages
@@ -100,7 +100,7 @@ class logging:
             os.mkdir(self.path)
 
     def log(self, module: str, message: str):
-        if not os.is_file(f"{self.path}/{module}_log.txt"):
+        if not os.path.isfile(f"{self.path}/{module}_log.txt"):
             # Logging file does not exist yet, create it
             open(f"{self.path}/{module}_log.txt", "w").close()
 
@@ -115,7 +115,15 @@ class logging:
 class statistics(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.start = time.time()
+        self.startup = time.time()
+
+    @commands.Cog.listener()
+    async def on_ready(self):
+        """
+        Listener: Logs startup once ready
+        """
+        self.bot.logs.log(self.__class__.__name__, "Started")
+        print(f"{self.__class__.__name__} ready")
 
 
 def setup(bot):

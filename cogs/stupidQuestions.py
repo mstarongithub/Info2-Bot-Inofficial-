@@ -13,6 +13,10 @@ class stupidQuestions(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
+        """
+        Listener: Logs startup once ready
+        """
+        self.bot.logs.log(self.__class__.__name__, "Started")
         print(f"{self.__class__.__name__} ready")
 
     """
@@ -28,6 +32,9 @@ class stupidQuestions(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
+        """
+        Listener: Responds to messages containing any regex expressions in phrases
+        """
         if message.author.id == self.bot.user.id:
             return  # Don't respond to own messages
         final = ""
@@ -46,10 +53,18 @@ class dadMode(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
+        """
+        Listener: Logs startup once ready
+        """
+        self.bot.logs.log(self.__class__.__name__, "Started")
         print(f"{self.__class__.__name__} ready")
 
     @commands.Cog.listener()
     async def on_message(self, message):
+        """
+        Listener: Responds to messages containing "I'm x" or "I am x" with
+        "Hi x, I'm dad"
+        """
         if message.author.id == self.bot.user.id:
             return  # Don't respond to own messages
         # Match any string with the syntax of I'm x | I am x
