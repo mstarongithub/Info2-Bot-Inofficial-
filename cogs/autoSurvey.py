@@ -164,14 +164,18 @@ class SurveysReact(commands.Cog):
         opts_raw = self.__get_attr(message_id, 'options')
         opts = [opts_raw[key] for key in opts_raw]
 
-        done = self.__is_done(message_id)
-
         channel = await self.bot.fetch_channel(channel_id)
 
         message = await channel.fetch_message(message_id)
 
         await message.edit(
-            embed=self.__make_embed(name, desc, untl, opts, done=done)
+            embed=self.__make_embed(
+                name, 
+                desc, 
+                untl, 
+                opts, 
+                done=self.__is_done(message_id)
+            )
         )
 
     @commands.Cog.listener()
