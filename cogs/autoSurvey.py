@@ -8,11 +8,12 @@ from discord.ext import commands
 from datetime import datetime
 import dateparser
 
-__authors__    = "Frederik Beimgraben"
-__credits__    = ["Frederik Beimgraben"]
+__authors__ = "Frederik Beimgraben"
+__credits__ = ["Frederik Beimgraben"]
 __maintainer__ = "Frederik Beimgraben"
-__email__      = "beimgraben8@gmail.com"
-__status__     = "WIP"
+__email__ = "beimgraben8@gmail.com"
+__status__ = "WIP"
+
 
 class SurveysReact(commands.Cog):
     """
@@ -62,8 +63,7 @@ class SurveysReact(commands.Cog):
         embed.add_field(name='Description: ', value=body)
         return embed
 
-    
-    def __get_survey_path(self, survey_id, must_exist:bool=True):
+    def __get_survey_path(self, survey_id, must_exist: bool = True):
         """
         Get path to a survey in `bot_data`. `None` if not in `bot_data`
         """
@@ -82,7 +82,7 @@ class SurveysReact(commands.Cog):
 
         if self.__get_survey_path(survey_id) == None:
             return None
-        
+
         attr_path = f'{self.__get_survey_path(survey_id)}.{attr}'
 
         return self.bot.bot_data[attr_path]
@@ -113,22 +113,22 @@ class SurveysReact(commands.Cog):
 
         if payload.guild_id is None:
             return None, None, None  # Reaction is on a private message
-        
+
         if payload.user_id == self.bot.user.id:
             return None, None, None  # Dont count bot reactions
-        
+
         if self.__get_survey_path(payload.message_id) != None:
             if not self.__is_done(payload.message_id):
                 emoji = str(payload.emoji)
                 if emoji in self.__get_survey_attr(payload.message_id, 'options'):
                     return (
-                        f'{self.__get_survey_path(payload.message_id)}.options.{emoji}[1]', 
-                        payload.channel_id, 
+                        f'{self.__get_survey_path(payload.message_id)}.options.{emoji}[1]',
+                        payload.channel_id,
                         payload.message_id
                     )
-        
+
         return None, payload.channel_id, payload.message_id
-    
+
     @commands.command(description="Create a new survey")
     async def survey(self, context, *args):
         """
@@ -160,14 +160,12 @@ class SurveysReact(commands.Cog):
                 embed=self.__make_embed(name, desc, untl, opts)
             )
 
-            path = f"surveys.{message.id}"
-
             self.__set_survey_attr(message.id, 'name', name)
             self.__set_survey_attr(message.id, 'description', desc)
             self.__set_survey_attr(message.id, 'until', untl)
             self.__set_survey_attr(
-                message.id, 
-                'options', 
+                message.id,
+                'options',
                 {self.__get_survey_react(i): opts[i] for i in range(len(opts))}
             )
 
@@ -175,7 +173,7 @@ class SurveysReact(commands.Cog):
 
             for o in range(len(opts)):
                 await message.add_reaction(self.__get_survey_react(i=o))
-    
+
     async def update_all(self, channel_id):
         """
         Update all surveys in `channel_id`
@@ -215,10 +213,10 @@ class SurveysReact(commands.Cog):
 
         await message.edit(
             embed=self.__make_embed(
-                name, 
-                desc, 
-                untl, 
-                opts, 
+                name,
+                desc,
+                untl,
+                opts,
                 done=self.__is_done(message_id)
             )
         )
@@ -253,6 +251,7 @@ class SurveysReact(commands.Cog):
             await self.update(message, channel)
         if self.__get_survey_path(message) != None:
             await self.update(message, channel)
+
 
 def setup(bot):
     bot.add_cog(SurveysReact(bot))
