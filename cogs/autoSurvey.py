@@ -153,11 +153,11 @@ class SurveysReact(commands.Cog):
         Update a survey message
         """
 
-        if self.__get_path(message_id) == None:
-            raise KeyError(f'\"{message_id}\" is not a survey')
-
         if channel_id == None or message_id == None:
             return
+
+        if self.__get_path(message_id) == None:
+            raise KeyError(f'\"{message_id}\" is not a survey')
 
         try:
             channel = await self.bot.fetch_channel(channel_id)
