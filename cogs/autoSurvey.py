@@ -168,6 +168,9 @@ class SurveysReact(commands.Cog):
 
         message = await channel.fetch_message(message_id)
 
+        if message == None:
+            return
+
         await message.edit(
             embed=self.__make_embed(
                 name, 
