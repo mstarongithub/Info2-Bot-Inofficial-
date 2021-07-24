@@ -33,10 +33,6 @@ if __name__ == '__main__':
 
     bot.bot_data = data
 
-    bot.bot_data["guilds.test"] = 5
-
-    del bot.bot_data["guilds"]
-
     for i in [j[:-3] for j in os.listdir("./cogs") if j[-2:] == "py"]:
         bot.load_extension(f"cogs.{i}")
     bot.run(authData.BOT_TOKEN)
