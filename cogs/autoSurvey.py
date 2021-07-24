@@ -64,6 +64,10 @@ class SurveysReact(commands.Cog):
 
     
     def __get_survey_path(self, survey_id):
+        """
+        Get path to a survey in `bot_data`. `None` if not in `bot_data`
+        """
+
         path = f'surveys.{survey_id}'
 
         if path not in self.bot.bot_data:
@@ -72,15 +76,27 @@ class SurveysReact(commands.Cog):
         return path
 
     def __get_survey_attr(self, survey_id, attr):
+        """
+        Get a attribute (subpath) for a survey
+        """
+
         if self.__get_survey_path(survey_id) == None:
             return None
         
         return self.bot.bot_data[f'{self.__get_survey_path(survey_id)}.{attr}']
 
-    def __set_survey_attr(self, survey_id, attr, value):        
+    def __set_survey_attr(self, survey_id, attr, value):
+        """
+        Set a attribute (subpath) for a survey
+        """
+
         self.bot.bot_data[f'surveys.{survey_id}.{attr}'] = value
 
     def __is_done(self, survey_id):
+        """
+        Has the participation period already ended?
+        """
+
         if self.__get_survey_path(survey_id) == None:
             return False
 
@@ -123,13 +139,17 @@ class SurveysReact(commands.Cog):
             untl = args[2]
             time_parsed = dateparser.parse(untl)
 
-            if time_parsed != None:
-                untl = time_parsed.strftime("%m/%d/%Y, %H:%M:%S")
-            else:
+            if time_parsed < datetime.now():
+                return await context.send(
+                    'Survey end can´t be in the past!'
+                )
+            elif time_parsed == None:
                 return await context.send(
                     'Time format incorrect!'
                 )
-            
+            else:
+                untl = time_parsed.strftime("%m/%d/%Y, %H:%M:%S")
+
             opts = args[3:] if len(args) > 3 else ["Ja", "Nein"]
             opts = [[opts[i], 0] for i in range(len(opts))]
 
@@ -154,6 +174,10 @@ class SurveysReact(commands.Cog):
                 await message.add_reaction(self.__get_survey_react(i=o))
     
     async def update_all(self, channel_id):
+        """
+        Update all surveys in `channel_id`
+        """
+        
         for message_id in list(self.bot.bot_data['surveys']):
             await self.update(message_id, channel_id)
 
