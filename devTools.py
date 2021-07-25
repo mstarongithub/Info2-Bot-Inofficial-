@@ -140,11 +140,11 @@ class Reloader(commands.Cog):
         tmp = ""
         for i in self.bot.cogs:
             if len(tmp) > 0:
-                tmp = f"{tmp}, {i[0]}"
+                tmp = f"{tmp}, {i}"
             else:
                 tmp = i
-        emb.add_field("Cogs", tmp)
-        context.reply(emb)
+        emb.add_field(name="Cogs", value=tmp)
+        await context.reply(embed=emb)
 
 
 def setup(bot):
