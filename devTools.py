@@ -27,23 +27,35 @@ class logging:
     This requires the module to call logging.log(name, message) to work
     """
 
-    def __init__(self, path="./data/logs"):
+    def __init__(self, path="data"):
         self.path = path
-        if not os.is_dir(self.path):
+
+        if not os.path.isdir(self.path):
             # Log folder does not exist, create it
             os.mkdir(self.path)
+        self.logPath = self.path+"/logs"
+        if not os.path.isdir(self.logPath):
+            os.mkdir(self.logPath)
 
-            def log(self, module: str, message: str):
-                if not os.path.isfile(f"{self.path}/{module}_log.txt"):
-                    # Logging file does not exist yet, create it
-                    open(f"{self.path}/{module}_log.txt", "w").close()
+    def log(self, module: str, message: str):
+        if not os.path.isfile(f"{self.logPath}/{module}_log.txt"):
+            # Logging file does not exist yet, create it
+            open(f"{self.logPath}/{module}_log.txt", "w").close()
 
-                    with open(f"{self.path}/{module}_log.txt", "a") as f:
-                        # Write log message in the following format:
-                        # [YYYY:MM:DD] [HH:mm:SS]: message
-                        t = time.localtime()
-                        f.write(f'[{t.tm_year}:{t.tm_mon}:{t.tm_mday}] \
-                        [{t.tm_hour}:{t.tm_min}:{t.tm_sec}]: {message}\n')
+        with open(f"{self.logPath}/{module}_log.txt", "a") as f:
+            # Write log message in the following format:
+            # [YYYY:MM:DD] [HH:mm:SS]: message
+            t = time.localtime()
+            # Format date to make shure it always has the same length
+            date = f"[{t.tm_year}:"
+            date = f"{date}{t.tm_mon if t.tm_mon > 9 else '0' + str(t.tm_mon)}:"
+            date = f"{date}{t.tm_mday if t.tm_mday > 9 else '0' + str(t.tm_mday)}]"
+            # Same with time
+            tm = f"[{t.tm_hour if t.tm_hour > 9 else '0' + str(t.tm_hour)}:"
+            tm = f"{tm}{t.tm_min if t.tm_min > 9 else '0' + str(t.tm_min)}:"
+            tm = f"{tm}{t.tm_sec if t.tm_sec > 9 else '0' + str(t.tm_sec)}]"
+            # Now write it
+            f.write(f"{date} {tm}: {message}\n")
 
 
 class Reloader(commands.Cog):
@@ -55,7 +67,7 @@ class Reloader(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.update.add_exception_type(asyncpg.PostgresConnectionError)
-        self.update.start()
+        # self.update.start()
 
     cmds = (
         'git init',
