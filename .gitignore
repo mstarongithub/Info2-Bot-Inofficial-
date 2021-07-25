@@ -2,5 +2,4 @@ authData.py
 .vscode/
 .mypy_cache/
 __pycache__/
-data
 data/

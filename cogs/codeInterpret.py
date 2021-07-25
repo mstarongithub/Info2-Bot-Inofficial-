@@ -1,11 +1,11 @@
-"""
-Features regarding code interpretation and execution
-"""
-
 import discord
 from discord.ext import commands
 
 from pistonapi import PistonAPI
+
+"""
+Features regarding code interpretation and execution
+"""
 
 __authors__ = "Frederik Beimgraben"
 __credits__ = ["Frederik Beimgraben"]
@@ -22,8 +22,8 @@ class ExecCode(commands.Cog):
     def __init__(self, bot, piston_api):
         langs = piston_api.languages
         self.vers = {
-            key: langs[key]['version'] for key in langs
-        }
+                key: langs[key]['version'] for key in langs
+            }
         self.langs = [
             key for key in langs
         ]
@@ -72,6 +72,7 @@ class ExecCode(commands.Cog):
         """
         Listener: Prints class name to stdout once ready
         """
+        self.bot.logs.log(self.__class__.__name__, "Started")
         print(f"{self.__class__.__name__} ready")
 
     @commands.Cog.listener()
@@ -91,9 +92,11 @@ class ExecCode(commands.Cog):
             code = content.replace(f'```{lang}\n', '')[:-3]
             if lang in self.langs:
                 # Language is supported
+                self.bot.logs.log(self.__class__,
+                                  f"Sending {lang} request to piston")
                 body = (
-                    '```\n' +
-                    self.api.execute(
+                    '```\n'
+                    + self.api.execute(
                         language=lang,
                         version=self.vers[lang],
                         code=code
