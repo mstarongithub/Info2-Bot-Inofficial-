@@ -1,13 +1,11 @@
 import discord
 from discord.ext import commands
-from discord.ext.commands.core import command
 
 from pistonapi import PistonAPI
 
 """
 Features regarding code interpretation and execution
 """
-
 
 __authors__ = "Frederik Beimgraben"
 __credits__ = ["Frederik Beimgraben"]
@@ -27,8 +25,8 @@ class ExecCode(commands.Cog):
                 key: langs[key]['version'] for key in langs
             }
         self.langs = [
-                key for key in langs
-            ]
+            key for key in langs
+        ]
         self.api = piston_api
         self.bot = bot
 
@@ -84,14 +82,14 @@ class ExecCode(commands.Cog):
         """
 
         if context.author.id == self.bot.user.id:
-            return   # Don't respond to own messages
+            return  # Don't respond to own messages
 
-        message = context.content
+        content = context.content
 
-        if message[:3] == '```' and message[-3:] == '```':
+        if content[:3] == '```' and content[-3:] == '```':
             # Message is a codeblock
-            lang = message.split('\n')[0][3:]
-            code = message.replace(f'```{lang}\n', '')[:-3]
+            lang = content.split('\n')[0][3:]
+            code = content.replace(f'```{lang}\n', '')[:-3]
             if lang in self.langs:
                 # Language is supported
                 self.bot.logs.log(self.__class__,
@@ -102,8 +100,8 @@ class ExecCode(commands.Cog):
                         language=lang,
                         version=self.vers[lang],
                         code=code
-                     )
-                    + '```'
+                    ) +
+                    '```'
                 )
                 await context.channel.send(
                     embed=self.__make_embed(
