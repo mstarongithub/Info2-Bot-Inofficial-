@@ -1,3 +1,4 @@
+from discord import Embed
 from discord.ext import commands, tasks
 import os
 import shutil
@@ -7,7 +8,7 @@ import time
 """
 (Automatic) methods to enhance the development flow
 Including:
-    - automatic pulling and reloading of the cogs folder from a known stable branch
+    - automatic pulling and reloading of the cogs folder from branch stable
     - functionality to reload specific / all cogs
     - statistics
     - logging
@@ -22,7 +23,7 @@ __status__ = "WIP"
 
 class Reloader(commands.Cog):
     """
-    Provide functionality for reloading cogs in ./cogs and updating them from branch stable
+    Reload and update cogs in ./cogs from branch stable
     TODO: Add function to reload specific cog
     """
 
@@ -33,13 +34,15 @@ class Reloader(commands.Cog):
 
     cmds = (
         'git init',
-        'git remote add origin https://github.com/MrEvilOnGitHub/Info2-Bot-Inofficial-.git',
+        'git remote add origin \
+        https://github.com/MrEvilOnGitHub/Info2-Bot-Inofficial-.git',
         'git config core.sparseCheckout true',
         'echo "cogs" > .git/info/sparse-checkout',
         'echo "bot-venv" >> .git/info/sparse-checkout',
         'git pull origin stable',
         'rm -rf .git',
-        'rsync -u -r --delete -c -b --backup-dir=./../cogs/backup cogs/ ./../cogs',
+        'rsync -u -r --delete -c -b --backup-dir=./../cogs/backup \
+        cogs/ ./../cogs',
         'rsync -u -r --delete -c ./bot-venv/ ./../bot-venv'
     )
 
@@ -108,17 +111,61 @@ class logging:
             # Write log message in the following format:
             # [YYYY:MM:DD] [HH:mm:SS]: message
             t = time.localtime()
-            f.write(f'[{t.tm_year}:{t.tm_month}:{t.tm_day}] \
+            f.write(f'[{t.tm_year}:{t.tm_mon}:{t.tm_mday}] \
             [{t.tm_hour}:{t.tm_min}:{t.tm_sec}]: {message}\n')
 
 
 class statistics:
+
+    """
+    Collects statistics on how often something has happened,
+    how long the bot has been running, etc
+    """
+
     def __init__(self):
-        self.startup = time.time()
-        self.executions = {}
+        self._startup = time.time()
+        self._funcCounter = {}
+        self._io = {
+            "read": 0,
+            "write": 0
+        }
+
+    def registerFunc(self, name):
+        """
+        Register a function to the counter
+        """
+        if name not in self.funcCounter:
+            self.funcCounter[name] = 0
+
+    def countFunc(self, name: str):
+        """
+        increase name's counter by 1
+        """
+        if name not in self._funcCounter:
+            # func isn't yet registered in the counter, add it
+            self._funcCounter[name] = 0
+        self._funcCounter[name] += 1
+
+    def addCounter(self, func):
+        """
+        Wrapper for automatic counting of calls of func
+        """
+        # Full func name (class.func) stored in __qualname__
+        name = func.__qualname__
+        self.registerFunc(name)
+
+        async def wrapper(*args, **kwargs):
+            self.countFunc(name)
+            await func(*args, **kwargs)
+
+        return wrapper
 
 
 class statisticsWrapper(commands.Cog):
+    """
+    Command interface for statistics
+    """
+
     def __init__(self, bot):
         self.bot = bot
         self.startup = time.time()
@@ -131,14 +178,27 @@ class statisticsWrapper(commands.Cog):
         self.bot.logs.log(self.__class__.__name__, "Started")
         print(f"{self.__class__.__name__} ready")
 
-    @commands.command
+    @commands.command(name="uptime", description="Get uptime of the bot")
     async def uptime(self, context):
+        """
+        Send the current uptime
+        """
         t = time.gmtime(time.time() - self.bot.startup)
         await context.reply(f'The bot has been running for \
         {t.tm_yday+(t.tm_year-1990)*365} days, {t.tm_hour} hours and \
         {t.tm_min} minutes')
 
+    @commands.command()
+    async def listAllFuncCounters(self, context):
+        embed = Embed(title="Functions usage",
+                      description="List of all functions and how often they've\
+                       been used"
+                      )
+        for key in statistics._funcCounter:
+            embed.add_field(
+                key, f"Used {statistics()._funcCounter[key]} times")
+        await context.send(embed)
+
 
 def setup(bot):
     bot.add_cog(Reloader(bot))
-    bot.add_cog(statisticsWrapper(bot))
