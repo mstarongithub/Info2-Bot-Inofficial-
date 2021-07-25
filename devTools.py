@@ -10,7 +10,6 @@ import time
 Including:
     - automatic pulling and reloading of the cogs folder from branch stable
     - functionality to reload specific / all cogs
-    - statistics
     - logging
 """
 
@@ -76,7 +75,7 @@ class Reloader(commands.Cog):
         'git config core.sparseCheckout true',
         'echo "cogs" > .git/info/sparse-checkout',
         'echo "bot-venv" >> .git/info/sparse-checkout',
-        'git pull origin stable',
+        'git pull origin master',
         'rm -rf .git',
         'rsync -u -r --delete -c -b --backup-dir=./../cogs/backup cogs/ ./../cogs',
         'rsync -u -r --delete -c ./bot-venv/ ./../bot-venv'
