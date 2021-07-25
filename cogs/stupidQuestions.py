@@ -44,6 +44,7 @@ class stupidQuestions(commands.Cog):
                 # Each answer takes it's own line
                 final += f"{self.phrases[i]}\n"
         if len(final) > 0:
+            self.bot.logs.log(self.__class__, "Phrase detected, responding")
             await message.reply(final[:-1])  # Cut trailing newline and send it
 
 
@@ -70,6 +71,7 @@ class dadMode(commands.Cog):
         # Match any string with the syntax of I'm x | I am x
         match = re.search(r".?(?:I'm|I am) (\b.*\b)", message.content)
         if match:
+            self.bot.logs.log(self.__class__, "Sending dad message")
             await message.reply(f"Hi {match.group(1)}, I'm dad!")
 
 

@@ -20,6 +20,7 @@ class example(commands.Cog):
 
     @commands.command(description="description")
     async def ex(self, context):
+        self.bot.logs.log(self.__class__, "Example")
         await context.send("Example")
 
     @commands.Cog.listener()

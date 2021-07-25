@@ -94,6 +94,8 @@ class ExecCode(commands.Cog):
             code = message.replace(f'```{lang}\n', '')[:-3]
             if lang in self.langs:
                 # Language is supported
+                self.bot.logs.log(self.__class__,
+                                  f"Sending {lang} request to piston")
                 body = (
                     '```\n'
                     + self.api.execute(

@@ -72,9 +72,8 @@ class statisticsWrapper(commands.Cog):
         Send the current uptime
         """
         t = time.gmtime(time.time() - self.bot.startup)
-        await context.reply(f'The bot has been running for \
-        {t.tm_yday+(t.tm_year-1990)*365} days, {t.tm_hour} hours and \
-        {t.tm_min} minutes')
+        x = f'The bot has been running for {t.tm_yday+(t.tm_year-1990)*365} days, {t.tm_hour} hours and {t.tm_min} minutes'
+        await context.reply(x)
 
     @commands.command()
     async def listAllFuncCounters(self, context):
