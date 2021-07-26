@@ -26,24 +26,27 @@ class logging:
     This requires the module to call logging.log(name, message) to work
     """
 
-    def __init__(self, path="data"):
+    def __init__(self, path: str = "data") -> None:
         self.path = path
 
         if not os.path.isdir(self.path):
-            # Log folder does not exist, create it
+            # Data folder doesn't exist, create it
             os.mkdir(self.path)
         self.logPath = self.path+"/logs"
         if not os.path.isdir(self.logPath):
+            # Logs folder doesn't exist inside data, create it
             os.mkdir(self.logPath)
 
-    def log(self, module: str, message: str):
+    def log(self, module: str, message: str) -> None:
+        """
+        Saves message in file path/logs/module_log.txt
+        Save format: [YYYY:MM:DD] [HH:mm:SS]: message
+        """
         if not os.path.isfile(f"{self.logPath}/{module}_log.txt"):
             # Logging file does not exist yet, create it
             open(f"{self.logPath}/{module}_log.txt", "w").close()
 
         with open(f"{self.logPath}/{module}_log.txt", "a") as f:
-            # Write log message in the following format:
-            # [YYYY:MM:DD] [HH:mm:SS]: message
             t = time.localtime()
             # Format date to make shure it always has the same length
             date = f"[{t.tm_year}:"
@@ -60,7 +63,7 @@ class logging:
 class Reloader(commands.Cog):
     """
     Reload and update cogs in ./cogs from branch stable
-    TODO: Add function to reload specific cog
+    Note: Automatic reloading is currently disabled, uncomment line 72 to enable
     """
 
     def __init__(self, bot):
@@ -68,6 +71,7 @@ class Reloader(commands.Cog):
         self.update.add_exception_type(asyncpg.PostgresConnectionError)
         # self.update.start()
 
+    # Set of commands used to update the cogs folder from the master branch
     cmds = (
         'git init',
         'git remote add origin \
@@ -83,9 +87,16 @@ class Reloader(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
+        """
+        Listener: Logs startup once ready
+        """
+        self.bot.logs.log(self.__class__.__name__, "Started")
         print(f"{self.__class__.__name__} ready")
 
-    def _pullCogs(self):
+    def _pullCogs(self) -> bool:
+        """
+        Pull the ./cogs from the master branch
+        """
         if "tmp" in os.listdir():
             shutil.rmtree("./tmp")
         os.mkdir("./tmp")
@@ -101,40 +112,62 @@ class Reloader(commands.Cog):
         return True
 
     def cog_unload(self):
+        """
+        Cancel the updates when this cog gets unloaded
+        """
         self.update.cancel()
 
     # Run update every week
     @tasks.loop(hours=24*7)
     async def update(self):
+        """
+        Repeated task: Update and reload the ./cogs folder every week
+        """
         self._pullCogs()
         await self.reloadAll()
 
-    def reloadAll(self):
+    def reloadAll(self) -> None:
+        """
+        Reload all extensions inside ./cogs
+        """
         for i in [j[:-3] for j in os.listdir("./cogs") if j[-2:] == "py"]:
             self.bot.logs.log(self.__class__, f"Attempting to reload {i}")
             try:
                 self.bot.reload_extension(f"cogs.{i}")
             except Exception as e:
                 self.bot.logs.log(
-                    self.__class__, f"Failed to reload {i}: {e}")
+                    self.__class__.__name__, f"Failed to reload {i}: {e}")
 
     @commands.command(hidden=True)
-    async def reloadAllCogs(self, context):
+    @commands.has_guild_permissions(administrator=True)
+    async def reloadAllCogs(self, context: commands.context.Context):
+        """
+        Command: Reload all cogs in ./cogs
+        """
         await context.send("Starting reload")
         self.reloadAll()
         await context.send("Finished reloading")
 
     @commands.command(hidden=True)
-    async def reloadCog(self, context, cog: str):
+    @commands.has_guild_permissions(administrator=True)
+    async def reloadCog(self, context: commands.context.Context, cog: str):
+        """
+        Reload extension cog.
+        """
         self.bot.logs.log(self.__class__, f"Attempting to reload {cog}")
         self.bot.logs.log()
         try:
             self.bot.reload_extension(cog)
         except Exception as e:
-            self.bot.logs.log("Reloader.reloadCog", e)
+            await context.send("Failed to reload cog")
+            self.bot.logs.log(self.__class__.__name__, e)
 
     @commands.command(hidden=True)
-    async def showActiveCogs(self, context):
+    @commands.has_guild_permissions(administrator=True)
+    async def showActiveCogs(self, context: commands.context.Context):
+        """
+        Send an Embed that lists all active cogs
+        """
         emb = Embed(title="Active Cogs")
         tmp = ""
         for i in self.bot.cogs:

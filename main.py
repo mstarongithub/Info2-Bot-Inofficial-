@@ -21,7 +21,6 @@ bot = commands.Bot(command_prefix="i!")
 bot.logs = logging()
 
 
-
 @bot.command()
 async def ping(context):
     await context.send("Pong")
@@ -33,11 +32,27 @@ async def shutdown(context):
     await context.bot.logout()
 
 if __name__ == '__main__':
+    # Entry point
     data = BotData()
 
     bot.bot_data = data
 
     for i in [j[:-3] for j in os.listdir("./cogs") if j[-2:] == "py"]:
-        bot.load_extension(f"cogs.{i}")
+        # load all .py files in ./cogs as sperate cogs
+        try:
+            bot.load_extension(f"cogs.{i}")
+        except Exception as e:
+            # Some error not related to the loading itself occured
+            if type(e) not in (commands.ExtensionNotFound,
+                               commands.ExtensionAlreadyLoaded,
+                               commands.NoEntryPointError,
+                               commands.ExtensionFailed):
+                bot.logs.log(bot.__class__.__name__, e)
+                raise e
+            else:
+                # Cog failed to load, log it and move on
+                bot.logs.log(bot.__class__.__name__, e)
+                print(f"Failed to load extension {i}")
+
     bot.load_extension("devTools")
     bot.run(authData.BOT_TOKEN)
