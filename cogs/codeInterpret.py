@@ -92,7 +92,7 @@ class ExecCode(commands.Cog):
             code = content.replace(f'```{lang}\n', '')[:-3]
             if lang in self.langs:
                 # Language is supported
-                self.bot.logs.log(self.__class__,
+                self.bot.logs.log(self.__class__.__name__,
                                   f"Sending {lang} request to piston")
                 body = (
                     '```\n'
