@@ -14,7 +14,7 @@ Including:
 """
 
 __authors__ = "Samuel Becker"
-__credits__ = ["Samuel Becker"]
+__credits__ = ["Samuel Becker", "Frederik Beimgraben"]
 __maintainer__ = "Samuel Becker"
 __email__ = "beckersamuel9@gmail.com"
 __status__ = "WIP"
