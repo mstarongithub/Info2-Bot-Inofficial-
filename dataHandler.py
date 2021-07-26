@@ -22,12 +22,15 @@ class BotData(object):
     > Use Keypaths seperated by `'.'` (`path.to.value`)
     """
 
-    def __init__(self, file_name: str = 'data.json', folder: str = 'db'):
+    def __init__(self, logger, file_name: str = 'data.json',
+                 folder: str = 'db'):
         """
         Get a new handle to the file:
         > `./data/folder/file_name`
         > (Defaults to `./data/db/data.json`)
         """
+
+        self.logger = logger
 
         # Check path
         cwd = Path(__file__).parent.absolute()
@@ -57,33 +60,48 @@ class BotData(object):
         except ValueError:
             ImportError('Data format not supported')
 
+        self.logger.log(self.__class__.__name__,
+                        f'New data handle generated for "{self.path}"')
+
     def store(self):
         """Store the data in `self.data` to `self.path`"""
 
         with open(self.path, 'w') as fp:
             json.dump(self.data, fp)
 
+        self.logger.log(self.__class__.__name__,
+                        f'Written written to "{self.path}"')
+
     def __getitem__(self, path: str):
         """Passthrough to `self.data[key]`"""
+
+        self.logger.log(self.__class__.__name__,
+                        f'{path} read from "{self.path}"')
 
         return self.data[path]
 
     def __delitem__(self, path: str):
         """Passthrough to `del self.data[key]`"""
 
+        self.logger.log(self.__class__.__name__,
+                        f'{path} deleted from "{self.path}"')
+
         del self.data[path]
+        self.store()
+
+    def __setitem__(self, path: str, value):
+        """Passthrough to `self.data[key] = value`"""
+
+        self.logger.log(self.__class__.__name__,
+                        f'{path} set in "{self.path}"')
+
+        self.data[path] = value
         self.store()
 
     def __contains__(self, item) -> bool:
         """Passthrough to `item in self.data`"""
 
         return item in self.data
-
-    def __setitem__(self, path: str, value):
-        """Passthrough to `self.data[key] = value`"""
-
-        self.data[path] = value
-        self.store()
 
     def __len__(self) -> int:
         """Passthrough to `len(self.data[key])`"""
