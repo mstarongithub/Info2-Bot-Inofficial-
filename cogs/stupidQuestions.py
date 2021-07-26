@@ -3,7 +3,7 @@ import re
 
 """
 Automatic reaction to stupid phrases like if-loop
-Those phrases can be created using normal string matching or regular expressions
+Those phrases can be normal string matching or regular expressions
 """
 
 
@@ -33,7 +33,7 @@ class stupidQuestions(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
         """
-        Listener: Responds to messages containing any regex expressions in phrases
+        Listener: Responds to messages containing certain phrases
         """
         if message.author.id == self.bot.user.id:
             return  # Don't respond to own messages
@@ -44,7 +44,8 @@ class stupidQuestions(commands.Cog):
                 # Each answer takes it's own line
                 final += f"{self.phrases[i]}\n"
         if len(final) > 0:
-            self.bot.logs.log(self.__class__.__name__, "Phrase detected, responding")
+            self.bot.logs.log(self.__class__.__name__,
+                              "Phrase detected, responding")
             await message.reply(final[:-1])  # Cut trailing newline and send it
 
 

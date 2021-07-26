@@ -33,26 +33,26 @@ class logging:
         if not os.path.isdir(self.path):
             # Data folder doesn't exist, create it
             os.mkdir(self.path)
-        self.logPath = self.path+"/logs"
-        if not os.path.isdir(self.logPath):
+        self.log_path = self.path+"/logs"
+        if not os.path.isdir(self.log_path):
             # Logs folder doesn't exist inside data, create it
-            os.mkdir(self.logPath)
+            os.mkdir(self.log_path)
 
     def log(self, module: str, message: str, priority: int = 0) -> None:
         """
         Saves message in file path/logs/module_log.txt
         Save format: [YYYY:MM:DD] [HH:mm:SS]: message
         """
-        if not os.path.isfile(f"{self.logPath}/{module}_log.txt"):
+        if not os.path.isfile(f"{self.log_path}/{module}_log.txt"):
             # Logging file does not exist yet, create it
-            open(f"{self.logPath}/{module}_log.txt", "w").close()
+            open(f"{self.log_path}/{module}_log.txt", "w").close()
 
-        with open(f"{self.logPath}/{module}_log.txt", "a") as f:
+        with open(f"{self.log_path}/{module}_log.txt", "a") as f:
             t = time.localtime()
             # Format date to make shure it always has the same length
             date = f"[{t.tm_year}:"
-            date = f"{date}{t.tm_mon if t.tm_mon > 9 else '0' + str(t.tm_mon)}:"
-            date = f"{date}{t.tm_mday if t.tm_mday > 9 else '0' + str(t.tm_mday)}]"
+            date = f"{date}{t.tm_mon if t.tm_mon > 9 else f'0{t.tm_mon}'}:"
+            date = f"{date}{t.tm_mday if t.tm_mday > 9 else  f'0{t.tm_mday}'}]"
             # Same with time
             tm = f"[{t.tm_hour if t.tm_hour > 9 else '0' + str(t.tm_hour)}:"
             tm = f"{tm}{t.tm_min if t.tm_min > 9 else '0' + str(t.tm_min)}:"
@@ -67,7 +67,7 @@ class logging:
             f.write(f"{date} {tm}: {message}\n")
 
 
-class Reloader(commands.Cog):
+class reloader(commands.Cog):
     """
     Reload and update cogs in ./cogs from branch stable
     Note: Automatic reloading is currently disabled, uncomment line 72 to
@@ -81,16 +81,16 @@ class Reloader(commands.Cog):
         # self.update.start()
 
     # Set of commands used to update the cogs folder from the master branch
+    lnk = "https://github.com/MrEvilOnGitHub/Info2-Bot-Inofficial-.git"
     cmds = (
         'git init',
-        'git remote add origin \
-        https://github.com/MrEvilOnGitHub/Info2-Bot-Inofficial-.git',
+        f'git remote add origin {lnk}',
         'git config core.sparseCheckout true',
         'echo "cogs" > .git/info/sparse-checkout',
         'echo "bot-venv" >> .git/info/sparse-checkout',
         'git pull origin master',
         'rm -rf .git',
-        'rsync -u -r --delete -c -b --backup-dir=./../cogs/backup cogs/ ./../cogs',
+        'rsync -u -r --delete -c cogs/ ./../cogs',
         'rsync -u -r --delete -c ./bot-venv/ ./../bot-venv'
     )
 
@@ -102,7 +102,7 @@ class Reloader(commands.Cog):
         self.bot.logs.log(self.__class__.__name__, "Started")
         print(f"{self.__class__.__name__} ready")
 
-    def _pullCogs(self) -> bool:
+    def __pull_cogs(self) -> bool:
         """
         Pull the ./cogs from the master branch
         """
@@ -133,10 +133,10 @@ class Reloader(commands.Cog):
         """
         Repeated task: Update and reload the ./cogs folder every week
         """
-        self._pullCogs()
-        await self.reloadAll()
+        self.__pull_cogs()
+        await self.reload_all()
 
-    def reloadAll(self) -> None:
+    def reload_all(self) -> None:
         """
         Reload all extensions inside ./cogs
         """
@@ -150,17 +150,17 @@ class Reloader(commands.Cog):
 
     @commands.command(hidden=True)
     @commands.has_guild_permissions(administrator=True)
-    async def reloadAllCogs(self, context: commands.context.Context):
+    async def reload_all_cogs(self, context: commands.context.Context):
         """
         Command: Reload all cogs in ./cogs
         """
         await context.send("Starting reload")
-        self.reloadAll()
+        self.reload_all()
         await context.send("Finished reloading")
 
     @commands.command(hidden=True)
     @commands.has_guild_permissions(administrator=True)
-    async def reloadCog(self, context: commands.context.Context, cog: str):
+    async def reload_cog(self, context: commands.context.Context, cog: str):
         """
         Reload extension cog.
         """
@@ -174,7 +174,7 @@ class Reloader(commands.Cog):
 
     @commands.command(hidden=True)
     @commands.has_guild_permissions(administrator=True)
-    async def showActiveCogs(self, context: commands.context.Context):
+    async def show_active_cogs(self, context: commands.context.Context):
         """
         Send an Embed that lists all active cogs
         """
@@ -190,4 +190,4 @@ class Reloader(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(Reloader(bot))
+    bot.add_cog(reloader(bot))
