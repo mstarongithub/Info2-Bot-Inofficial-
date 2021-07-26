@@ -25,7 +25,7 @@ class SurveysReact(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         """Print class name to stdout once ready"""
-
+        self.bot.logs.log(self.__class__.__name__, "Started")
         print(f"{self.__class__.__name__} ready")
 
     # Number Keycap Emojis
@@ -90,6 +90,8 @@ class SurveysReact(commands.Cog):
     def __set_survey_attr(self, survey_id: Union[str, int], attr: str,
                           value):
         """Set a attribute (subpath) for a survey"""
+        self.bot.logs.log(self.__class__.__name__,
+                          f'Write to survey attribute: {survey_id}.{attr}')
 
         attr_path = f'{self.__get_survey_path(survey_id, False)}.{attr}'
 
@@ -172,7 +174,8 @@ class SurveysReact(commands.Cog):
                 {self.__get_survey_react(i): opts[i] for i in range(len(opts))}
             )
 
-            print(f'Survey created: {message.id}')
+            self.bot.logs.log(self.__class__.__name__,
+                              f'Survey created: {message.id}', 1)
 
             for o in range(len(opts)):
                 await message.add_reaction(self.__get_survey_react(i=o))
@@ -203,7 +206,8 @@ class SurveysReact(commands.Cog):
         except discord.errors.NotFound:
             return
 
-        print(f'Updated Survey: {message_id}')
+        self.bot.logs.log(self.__class__.__name__,
+                          f'Updated Survey: {message_id}', 1)
 
         name = self.__get_survey_attr(message_id, 'name')
         desc = self.__get_survey_attr(message_id, 'description')
@@ -231,7 +235,11 @@ class SurveysReact(commands.Cog):
         counter, channel, message = self.__parse_reaction_payload(payload)
         if counter is not None:
             self.bot.bot_data[counter] += 1
-            print(f'Set {counter[:-4]} to {self.bot.bot_data[counter]} (++)')
+            self.bot.logs.log(
+                self.__class__.__name__,
+                f'Set {counter[:-4]} to {self.bot.bot_data[counter]} (++)',
+                1
+            )
             await self.update(message, channel)
         if self.__get_survey_path(message) is not None:
             await self.update(message, channel)
@@ -243,7 +251,11 @@ class SurveysReact(commands.Cog):
         counter, channel, message = self.__parse_reaction_payload(payload)
         if counter is not None:
             self.bot.bot_data[counter] -= 1
-            print(f'Set {counter[:-4]} to {self.bot.bot_data[counter]} (--)')
+            self.bot.logs.log(
+                self.__class__.__name__,
+                f'Set {counter[:-4]} to {self.bot.bot_data[counter]} (--)',
+                1
+            )
             await self.update(message, channel)
         if self.__get_survey_path(message) is not None:
             await self.update(message, channel)

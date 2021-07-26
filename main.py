@@ -32,7 +32,7 @@ async def shutdown(context):
 
 if __name__ == '__main__':
     # Entry point
-    data = BotData()
+    data = BotData(bot.logs)
 
     bot.bot_data = data
 

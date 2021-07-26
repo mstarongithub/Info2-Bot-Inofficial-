@@ -30,7 +30,7 @@ class ExecCode(commands.Cog):
         self.bot = bot
 
     # Error indicating keywords (must be lowercase)
-    errors = [
+    __errors = [
         'error',
         'exception',
         'segmentationfault',
@@ -40,7 +40,7 @@ class ExecCode(commands.Cog):
     def __contains_error(self, string: str) -> bool:
         """Check if `string` contains any keyword within `self.errors`"""
 
-        for e in self.errors:
+        for e in self.__errors:
             if e in string.lower():
                 return True
         return False

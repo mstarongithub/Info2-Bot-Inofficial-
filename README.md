@@ -10,6 +10,7 @@ There is a [Trello](https://trello.com/b/M3wlcI77/info2bot) board for this proje
 
 # Style guidelines
 - The official Python style guidelines apply. There are several plugins for each editor that can help you with that
+- Read PEP8 for naming
 - Every new major feature belongs in it's own cog
 - All cogs belong in ./cogs
 - Copy the content of exampleCog.py.template as starting structure

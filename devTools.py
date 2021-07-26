@@ -14,7 +14,7 @@ Including:
 """
 
 __authors__ = "Samuel Becker"
-__credits__ = ["Samuel Becker"]
+__credits__ = ["Samuel Becker", "Frederik Beimgraben"]
 __maintainer__ = "Samuel Becker"
 __email__ = "beckersamuel9@gmail.com"
 __status__ = "WIP"
@@ -26,8 +26,9 @@ class logging:
     This requires the module to call logging.log(name, message) to work
     """
 
-    def __init__(self, path: str = "data") -> None:
+    def __init__(self, path: str = "data", stdout_priority: int = 1) -> None:
         self.path = path
+        self.stdout_priority = stdout_priority
 
         if not os.path.isdir(self.path):
             # Data folder doesn't exist, create it
@@ -37,7 +38,7 @@ class logging:
             # Logs folder doesn't exist inside data, create it
             os.mkdir(self.log_path)
 
-    def log(self, module: str, message: str) -> None:
+    def log(self, module: str, message: str, priority: int = 0) -> None:
         """
         Saves message in file path/logs/module_log.txt
         Save format: [YYYY:MM:DD] [HH:mm:SS]: message
@@ -56,6 +57,12 @@ class logging:
             tm = f"[{t.tm_hour if t.tm_hour > 9 else '0' + str(t.tm_hour)}:"
             tm = f"{tm}{t.tm_min if t.tm_min > 9 else '0' + str(t.tm_min)}:"
             tm = f"{tm}{t.tm_sec if t.tm_sec > 9 else '0' + str(t.tm_sec)}]"
+            # Replace all unicode characters in message
+            message = ''.join([
+                i if ord(i) < 128 else f'U+{hex(ord(i))}' for i in message])
+            # Print to stdout
+            if self.stdout_priority <= priority:
+                print(message)
             # Now write it
             f.write(f"{date} {tm}: {message}\n")
 
@@ -63,11 +70,13 @@ class logging:
 class reloader(commands.Cog):
     """
     Reload and update cogs in ./cogs from branch stable
-    Automatic reloading is currently disabled, uncomment line 72 to enable
+    Note: Automatic reloading is currently disabled, uncomment line 72 to
+    enable
     """
 
     def __init__(self, bot):
         self.bot = bot
+        # pylint: disable=no-member;
         self.update.add_exception_type(asyncpg.PostgresConnectionError)
         # self.update.start()
 
@@ -115,6 +124,7 @@ class reloader(commands.Cog):
         """
         Cancel the updates when this cog gets unloaded
         """
+        # pylint: disable=no-member;
         self.update.cancel()
 
     # Run update every week
