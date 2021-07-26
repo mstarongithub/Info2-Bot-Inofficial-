@@ -1,7 +1,8 @@
 import discord
+from discord import Embed
 from discord.ext import commands
-
 from pistonapi import PistonAPI
+from typing import Union
 
 """
 Features regarding code interpretation and execution
@@ -15,40 +16,43 @@ __status__ = "WIP"
 
 
 class ExecCode(commands.Cog):
-    """
-    Execute codeblocks and respond with their output
-    """
+    """Execute codeblocks and respond with their output"""
 
-    def __init__(self, bot, piston_api):
+    def __init__(self, bot: commands.Bot, piston_api: PistonAPI):
         langs = piston_api.languages
         self.vers = {
-                key: langs[key]['version'] for key in langs
-            }
-        self.langs = [
-            key for key in langs
-        ]
+            key: langs[key]['version'] for key in langs
+        }
+
+        self.langs = {
+                key: key for key in langs
+        }
+
+        for key in reversed(langs):
+            for alias in langs[key]['aliases']:
+                self.langs[alias] = key
+
         self.api = piston_api
         self.bot = bot
 
     # Error indicating keywords (must be lowercase)
-    errors = [
+    __errors = [
         'error',
         'exception',
         'segmentationfault',
         'invalid'
     ]
 
-    def __contains_error(self, string):
-        """
-        Check if `string` contains any keyword within `self.errors`
-        """
+    def __contains_error(self, string: str) -> bool:
+        """Check if `string` contains any keyword within `self.errors`"""
 
-        for e in self.errors:
+        for e in self.__errors:
             if e in string.lower():
                 return True
         return False
 
-    def __make_embed(self, body, lang, version):
+    def __make_embed(self, body: str, lang: str,
+                     version: Union[str, int]) -> Embed:
         """
         Create an embed containing the response `body` as well as the used
         interpreter `lang` and it´s `version`.
@@ -69,17 +73,13 @@ class ExecCode(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        """
-        Listener: Prints class name to stdout once ready
-        """
+        """Print class name to stdout once ready"""
         self.bot.logs.log(self.__class__.__name__, "Started")
         print(f"{self.__class__.__name__} ready")
 
     @commands.Cog.listener()
     async def on_message(self, context):
-        """
-        Listener: Responds to any codeblocks with a supported language tag
-        """
+        """Respond to any codeblocks with a supported language tag"""
 
         if context.author.id == self.bot.user.id:
             return  # Don't respond to own messages
@@ -91,8 +91,9 @@ class ExecCode(commands.Cog):
             lang = content.split('\n')[0][3:]
             code = content.replace(f'```{lang}\n', '')[:-3]
             if lang in self.langs:
+                lang = self.langs[lang]
                 # Language is supported
-                self.bot.logs.log(self.__class__,
+                self.bot.logs.log(self.__class__.__name__,
                                   f"Sending {lang} request to piston")
                 body = (
                     '```\n'
