@@ -25,9 +25,9 @@ class stupidQuestions(commands.Cog):
         "key2, be it regex or not": "Answer"
     """
     phrases = {
-        "if-loop": "While it sometimes may look like it, if constructs are, in fact, not able to construct a loop on their own",
+        "(?i)if(?:-| )(?:loop|Schleife)": "While it sometimes may look like it, if constructs are, in fact, not able to construct a loop on their own",
         "(?<!GNU)[Ll]inux": "It's GNU/Linux, you buffoon!",
-        "(?i)(?:more|not enough) RAM": "Need more ram? Go to https://www.downloadmoreram.com/download.html"
+        "(?i)(?:more|not enough|mehr|nicht genug) RAM": "Need more ram? Go to https://www.downloadmoreram.com/download.html"
     }
 
     @commands.Cog.listener()
