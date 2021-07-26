@@ -21,11 +21,17 @@ class ExecCode(commands.Cog):
     def __init__(self, bot: commands.Bot, piston_api: PistonAPI):
         langs = piston_api.languages
         self.vers = {
-                key: langs[key]['version'] for key in langs
-            }
-        self.langs = [
-            key for key in langs
-        ]
+            key: langs[key]['version'] for key in langs
+        }
+
+        self.langs = {
+                key: key for key in langs
+        }
+
+        for key in reversed(langs):
+            for alias in langs[key]['aliases']:
+                self.langs[alias] = key
+
         self.api = piston_api
         self.bot = bot
 
@@ -85,6 +91,7 @@ class ExecCode(commands.Cog):
             lang = content.split('\n')[0][3:]
             code = content.replace(f'```{lang}\n', '')[:-3]
             if lang in self.langs:
+                lang = self.langs[lang]
                 # Language is supported
                 self.bot.logs.log(self.__class__.__name__,
                                   f"Sending {lang} request to piston")
