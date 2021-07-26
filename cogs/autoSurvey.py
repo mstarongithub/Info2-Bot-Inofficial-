@@ -3,10 +3,11 @@ Command generated surveys
 """
 
 import discord
-from discord import RawReactionActionEvent
+from discord import RawReactionActionEvent, Embed
 from discord.ext import commands
 from datetime import datetime
 import dateparser
+from typing import Union
 
 __authors__ = "Frederik Beimgraben"
 __credits__ = ["Frederik Beimgraben"]
@@ -16,34 +17,32 @@ __status__ = "WIP"
 
 
 class SurveysReact(commands.Cog):
-    """
-    Simple reaction surveys with time limit
-    """
+    """Simple reaction surveys with time limit"""
 
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @commands.Cog.listener()
     async def on_ready(self):
+        """Print class name to stdout once ready"""
+
         print(f"{self.__class__.__name__} ready")
 
+    # Number Keycap Emojis
     __numbers = [
         "{}\N{COMBINING ENCLOSING KEYCAP}".format(num) for num in range(1, 10)
     ]
 
-    def __get_survey_react(self, i=0):
-        """
-        Return reaction for Index
-        """
+    def __get_survey_react(self, i: int = 0) -> str:
+        """Return reaction for Index"""
 
         assert i < 9
 
         return f'{self.__numbers[i]}'
 
-    def __make_embed(self, name, desc, untl, options, done=False):
-        """
-        Create a Survey Embed
-        """
+    def __make_embed(self, name: str, desc: str,
+                     untl: str, options: list, done: bool = False) -> Embed:
+        """Create a Survey Embed"""
 
         body = f"*{desc}*\n"
 
@@ -67,10 +66,9 @@ class SurveysReact(commands.Cog):
         embed.add_field(name='Description: ', value=body)
         return embed
 
-    def __get_survey_path(self, survey_id, must_exist: bool = True):
-        """
-        Get path to a survey in `bot_data`. `None` if not in `bot_data`
-        """
+    def __get_survey_path(self, survey_id: Union[str, int],
+                          must_exist: bool = True) -> str:
+        """Get path to a survey in `bot_data`. `None` if not in `bot_data`"""
 
         path = f'surveys.{survey_id}'
 
@@ -79,10 +77,8 @@ class SurveysReact(commands.Cog):
 
         return path
 
-    def __get_survey_attr(self, survey_id, attr):
-        """
-        Get a attribute (subpath) for a survey
-        """
+    def __get_survey_attr(self, survey_id: Union[str, int], attr: str):
+        """Get a attribute (subpath) for a survey"""
 
         if self.__get_survey_path(survey_id) is None:
             return None
@@ -91,25 +87,22 @@ class SurveysReact(commands.Cog):
 
         return self.bot.bot_data[attr_path]
 
-    def __set_survey_attr(self, survey_id, attr, value):
-        """
-        Set a attribute (subpath) for a survey
-        """
+    def __set_survey_attr(self, survey_id: Union[str, int], attr: str,
+                          value):
+        """Set a attribute (subpath) for a survey"""
 
         attr_path = f'{self.__get_survey_path(survey_id, False)}.{attr}'
 
         self.bot.bot_data[attr_path] = value
 
-    def __until(self, survey_id):
+    def __until(self, survey_id: Union[str, int]) -> datetime:
         if self.__get_survey_path(survey_id) is None:
             return datetime.now()
 
         return dateparser.parse(self.__get_survey_attr(survey_id, 'until'))
 
-    def __is_done(self, survey_id):
-        """
-        Has the participation period already ended?
-        """
+    def __is_done(self, survey_id: Union[str, int]) -> bool:
+        """Has the participation period already ended?"""
 
         if self.__get_survey_path(survey_id) is None:
             return False
@@ -117,9 +110,7 @@ class SurveysReact(commands.Cog):
         return self.__until(survey_id) < datetime.now()
 
     def __parse_reaction_payload(self, payload: RawReactionActionEvent):
-        """
-        Parse user reaction and check if message is a survey
-        """
+        """Parse user reaction and check if message is a survey"""
 
         if payload.guild_id is None:
             return None, None, None  # Reaction is on a private message
@@ -186,18 +177,15 @@ class SurveysReact(commands.Cog):
             for o in range(len(opts)):
                 await message.add_reaction(self.__get_survey_react(i=o))
 
-    async def update_all(self, channel_id):
-        """
-        Update all surveys in `channel_id`
-        """
+    async def update_all(self, channel_id: Union[str, int]):
+        """Update all surveys in `channel_id`"""
 
         for message_id in list(self.bot.bot_data['surveys']):
             await self.update(message_id, channel_id)
 
-    async def update(self, message_id, channel_id):
-        """
-        Update a survey message
-        """
+    async def update(self, message_id: Union[str, int],
+                     channel_id: Union[str, int]):
+        """Update a survey message"""
 
         if channel_id is None or message_id is None:
             return
@@ -238,9 +226,7 @@ class SurveysReact(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: RawReactionActionEvent):
-        """
-        Increment when reaction is clicked by user
-        """
+        """Increment when reaction is clicked by user"""
 
         counter, channel, message = self.__parse_reaction_payload(payload)
         if counter is not None:
@@ -252,9 +238,7 @@ class SurveysReact(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload: RawReactionActionEvent):
-        """
-        Decrement when reaction is unclicked by user
-        """
+        """Decrement when reaction is unclicked by user"""
 
         counter, channel, message = self.__parse_reaction_payload(payload)
         if counter is not None:
