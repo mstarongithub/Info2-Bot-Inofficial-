@@ -175,7 +175,7 @@ class SurveysReact(commands.Cog):
             )
 
             self.bot.logs.log(self.__class__.__name__,
-                              f'Survey created: {message.id}')
+                              f'Survey created: {message.id}', 1)
 
             for o in range(len(opts)):
                 await message.add_reaction(self.__get_survey_react(i=o))
@@ -207,7 +207,7 @@ class SurveysReact(commands.Cog):
             return
 
         self.bot.logs.log(self.__class__.__name__,
-                          f'Updated Survey: {message_id}')
+                          f'Updated Survey: {message_id}', 1)
 
         name = self.__get_survey_attr(message_id, 'name')
         desc = self.__get_survey_attr(message_id, 'description')
@@ -237,7 +237,8 @@ class SurveysReact(commands.Cog):
             self.bot.bot_data[counter] += 1
             self.bot.logs.log(
                 self.__class__.__name__,
-                f'Set {counter[:-4]} to {self.bot.bot_data[counter]} (++)'
+                f'Set {counter[:-4]} to {self.bot.bot_data[counter]} (++)',
+                1
             )
             await self.update(message, channel)
         if self.__get_survey_path(message) is not None:
@@ -252,7 +253,8 @@ class SurveysReact(commands.Cog):
             self.bot.bot_data[counter] -= 1
             self.bot.logs.log(
                 self.__class__.__name__,
-                f'Set {counter[:-4]} to {self.bot.bot_data[counter]} (--)'
+                f'Set {counter[:-4]} to {self.bot.bot_data[counter]} (--)',
+                1
             )
             await self.update(message, channel)
         if self.__get_survey_path(message) is not None:

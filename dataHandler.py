@@ -70,7 +70,7 @@ class BotData(object):
             json.dump(self.data, fp)
 
         self.logger.log(self.__class__.__name__,
-                        f'Written to "{self.path}"')
+                        f'Written to "{self.path}"', 1)
 
     def __getitem__(self, path: str):
         """Passthrough to `self.data[key]`"""
