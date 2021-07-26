@@ -70,15 +70,13 @@ class logging:
 class reloader(commands.Cog):
     """
     Reload and update cogs in ./cogs from branch stable
-    Note: Automatic reloading is currently disabled, uncomment line 72 to
-    enable
     """
 
     def __init__(self, bot):
         self.bot = bot
         # pylint: disable=no-member;
         self.update.add_exception_type(asyncpg.PostgresConnectionError)
-        # self.update.start()
+        self.update.start()
 
     # Set of commands used to update the cogs folder from the master branch
     lnk = "https://github.com/MrEvilOnGitHub/Info2-Bot-Inofficial-.git"
@@ -171,6 +169,12 @@ class reloader(commands.Cog):
         except Exception as e:
             await context.send("Failed to reload cog")
             self.bot.logs.log(self.__class__.__name__, e)
+
+    @commads.command(hidden=True)
+    @commands.has_guild_permissions(administrator=True)
+    async def pull_cogs(self, context: commands.context.Context):
+        self.__pull_cogs()
+        self.reload_all()
 
     @commands.command(hidden=True)
     @commands.has_guild_permissions(administrator=True)
