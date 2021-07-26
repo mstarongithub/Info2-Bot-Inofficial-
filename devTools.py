@@ -57,6 +57,9 @@ class logging:
             tm = f"{tm}{t.tm_min if t.tm_min > 9 else '0' + str(t.tm_min)}:"
             tm = f"{tm}{t.tm_sec if t.tm_sec > 9 else '0' + str(t.tm_sec)}]"
             # Now write it
+            message = ''.join([
+                i if ord(i) < 128 else f'U+{hex(ord(i))}' for i in message
+            ])
             f.write(f"{date} {tm}: {message}\n")
 
 
