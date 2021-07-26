@@ -73,7 +73,7 @@ class dadMode(commands.Cog):
         match = re.search(r".?(?:I'm|I am) (\b.*\b)", message.content)
         if match:
             self.bot.logs.log(self.__class__.__name__, "Sending dad message")
-            await message.reply(f"Hi {match.group(1)}, I'm dad!")
+            await message.reply(f"Hi {match.group(1)}, I'm Info2-Bot!")
 
 
 def setup(bot):
