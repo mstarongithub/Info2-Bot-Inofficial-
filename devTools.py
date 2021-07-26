@@ -170,7 +170,7 @@ class reloader(commands.Cog):
             await context.send("Failed to reload cog")
             self.bot.logs.log(self.__class__.__name__, e)
 
-    @commads.command(hidden=True)
+    @commands.command(hidden=True)
     @commands.has_guild_permissions(administrator=True)
     async def pull_cogs(self, context: commands.context.Context):
         self.__pull_cogs()
