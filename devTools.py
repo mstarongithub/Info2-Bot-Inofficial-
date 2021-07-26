@@ -132,7 +132,7 @@ class reloader(commands.Cog):
         Repeated task: Update and reload the ./cogs folder every week
         """
         self.__pull_cogs()
-        await self.reload_all()
+        self.reload_all()
 
     def reload_all(self) -> None:
         """
