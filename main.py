@@ -32,6 +32,7 @@ async def shutdown(context):
 
 if __name__ == '__main__':
     # Entry point
+    bot.auth = authData.other
     data = BotData(bot.logs)
 
     bot.bot_data = data
@@ -54,4 +55,4 @@ if __name__ == '__main__':
                 print(f"Failed to load extension {i}")
 
     bot.load_extension("devTools")
-    bot.run(authData.BOT_TOKEN)
+    bot.run(authData.discord.BOT_TOKEN)

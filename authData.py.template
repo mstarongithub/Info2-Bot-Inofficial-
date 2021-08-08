@@ -1,2 +1,13 @@
-APP_TOKEN = "Some long number"
-BOT_TOKEN = "A long, weird sequence of characters"
+class discord:
+    """Secrets container for discord api"""
+    APP_TOKEN = "Your app token"
+    BOT_TOKEN = "Your bot token"
+
+
+class other:
+    """Secrets container for everything except Discord"""
+        class reddit:
+            """Secrets container for reddit api"""
+            client_id = "Your client/app id"
+            client_secret = "Your client secret"
+            user_agent = "<platform>:<app ID>:<version string> (by u/<Reddit username>)"
